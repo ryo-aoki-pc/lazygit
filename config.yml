@@ -1,0 +1,227 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/jesseduffield/lazygit/master/schema/config.json
+#
+# lazygit 設定ファイル
+# ====================
+# 配置場所:
+#   - Linux:   ~/.config/lazygit/config.yml
+#   - macOS:   ~/Library/Application Support/lazygit/config.yml
+#   - Windows: %LOCALAPPDATA%\lazygit\config.yml
+# 実際に読み込まれるディレクトリは `lazygit --print-config-dir` で確認できます。
+#
+# 前提ツール(詳細は README.md):
+#   - Nerd Fonts … gui.nerdFontsVersion 用。未導入なら "" にする
+#   - delta      … git.pagers 用。未導入なら pagers ブロックをコメントアウト
+#
+# 1行目の yaml-language-server コメントにより、VSCode(YAML拡張)などの対応エディタで
+# 入力補完とスキーマ検証が効きます。
+# ここに書いていない項目はデフォルト値で動きます(デフォルトの再記述はしない方針)。
+#
+# 全設定項目のリファレンス:
+#   https://github.com/jesseduffield/lazygit/blob/master/docs/Config.md
+
+# ---------------------------------------------------------------------------
+# 画面まわり
+# ---------------------------------------------------------------------------
+gui:
+  # UI言語。auto はOSのロケールから自動判定(日本語に固定したい場合は ja)
+  language: auto
+
+  # Nerd Fonts(v3系)のアイコン表示。フォント未導入で文字化けする場合は "" にする
+  nerdFontsVersion: "3"
+
+  # '/' での検索・絞り込みをあいまい一致(fuzzy match)にする
+  filterMode: fuzzy
+
+  # フォーカス中のサイドパネルを自動的に広げて見やすくする
+  expandFocusedSidePanel: true
+
+  # メインビューのスクロール量(デフォルトの2は遅い)
+  scrollHeight: 10
+
+  # パネル番号キー(1〜5)をもう一度押すと、そのパネル内のタブを切替
+  switchTabsWithPanelJumpKeys: true
+
+  # ブランチ一覧にコミットハッシュを表示
+  showBranchCommitHash: true
+
+  # ファイル一覧に変更行数(+10 -3 のような numstat)を表示
+  showNumstatInFilesView: true
+
+  # ベースブランチ(main等)からの遅れを「↓3」のように矢印+数字で表示
+  showDivergenceFromBaseBranch: arrowAndNumber
+
+  # 起動時のランダムTips表示をオフ
+  showRandomTip: false
+
+  # 日付をISO形式・24時間表記で表示(Goのtime format構文)
+  timeFormat: "2006-01-02"
+  shortTimeFormat: "15:04"
+
+  # 配色(色名のほか '#RRGGBB' 形式も使用可能)
+  theme:
+    activeBorderColor:
+      - green
+      - bold
+    inactiveBorderColor:
+      - default
+    searchingActiveBorderColor:
+      - cyan
+      - bold
+    selectedLineBgColor:
+      - blue
+    optionsTextColor:
+      - blue
+
+  # ステータスパネルに全ブランチのログを表示したい場合(デフォルト: dashboard)
+  # statusPanelView: allBranchesLog
+
+  # ターミナルのテキスト選択を優先したい場合はマウス操作を無効化(デフォルト: 有効)
+  # mouseEvents: false
+
+  # サイドパネルを狭くしたい場合(デフォルト: 0.3333)
+  # sidePanelWidth: 0.2
+
+  # コミット作者ごとに色分けしたい場合の例
+  # authorColors:
+  #   "Ryo Aoki": "#89b4fa"
+  #   "*": white
+
+# ---------------------------------------------------------------------------
+# Git の挙動
+# ---------------------------------------------------------------------------
+git:
+  # 差分表示を delta で強化(要 https://github.com/dandavison/delta )
+  #   - --paging=never は必須(lazygit が自前のビューに描画するため)
+  #   - ライトテーマの端末では --dark を --light に変更
+  #   - side-by-side はパネル幅の都合で崩れやすいため非推奨
+  pagers:
+    - colorArg: always
+      pager: delta --dark --paging=never
+      # 行番号付き + クリックでエディタの該当行を開くリッチ版:
+      # pager: delta --dark --paging=never --line-numbers --hyperlinks --hyperlinks-file-link-format="lazygit-edit://{path}:{line}"
+
+  # コミットメッセージ中の :sparkles: のような絵文字コードを絵文字として表示
+  parseEmoji: true
+
+  # ベースブランチとして扱うブランチを増やす場合(デフォルト: [master, main])
+  # mainBranches: [master, main, develop]
+
+  # フェッチ後の自動 fast-forward を全ブランチに広げたい場合
+  # (デフォルトの onlyMainBranches では main/master 等のみ自動 ff)
+  # autoForwardBranches: allBranches
+
+  # ブランチ名からコミットメッセージの接頭辞を自動入力する例
+  # (例: ブランチ feature/JIRA-123 → メッセージ欄に "[JIRA-123] " を自動挿入)
+  # commitPrefix:
+  #   - pattern: "^\\w+\\/(\\w+-\\w+).*"
+  #     replace: "[$1] "
+
+# ---------------------------------------------------------------------------
+# OS連携(必要になったらコメントを外す)
+# ---------------------------------------------------------------------------
+# os:
+#   # 'e' キーでファイルを開くエディタ。未指定なら git config core.editor や
+#   # $EDITOR から自動判定される(vscode / nvim / vim / emacs / helix / zed など)
+#   editPreset: nvim
+#
+#   # SSH先やtmux内でもOSC52でローカルのクリップボードにコピーしたい場合
+#   # (tmux内では公式Config.mdのtmux用ラップ版を使うこと)
+#   copyToClipboardCmd: printf "\033]52;c;$(printf {{text}} | base64 -w 0)\a" > /dev/tty
+
+# ---------------------------------------------------------------------------
+# 全体の挙動
+# ---------------------------------------------------------------------------
+# エディタなど外部コマンドから戻る際に Enter キーを要求しない
+promptToReturnFromSubprocess: false
+
+# 起動時のお知らせポップアップを表示しない
+disableStartupPopups: true
+
+# lazygit 本体を Homebrew 等のパッケージマネージャで管理している場合は
+# 内蔵アップデート機能を無効化(デフォルト: prompt)
+# update:
+#   method: never
+
+# ---------------------------------------------------------------------------
+# カスタムコマンド(好きなキーに任意の git コマンドを割り当て)
+#   詳細: https://github.com/jesseduffield/lazygit/blob/master/docs/Custom_Command_Keybindings.md
+# ---------------------------------------------------------------------------
+customCommands:
+  # Ctrl+V: Conventional Commits 形式のコミットを対話形式で作成
+  - key: "<c-v>"
+    context: "global"
+    description: "Conventional Commit を作成"
+    prompts:
+      - type: "menu"
+        key: "Type"
+        title: "変更の種類"
+        options:
+          - name: "feat"
+            description: "新機能"
+            value: "feat"
+          - name: "fix"
+            description: "バグ修正"
+            value: "fix"
+          - name: "docs"
+            description: "ドキュメントのみの変更"
+            value: "docs"
+          - name: "style"
+            description: "動作に影響しない変更(フォーマット等)"
+            value: "style"
+          - name: "refactor"
+            description: "リファクタリング"
+            value: "refactor"
+          - name: "perf"
+            description: "パフォーマンス改善"
+            value: "perf"
+          - name: "test"
+            description: "テストの追加・修正"
+            value: "test"
+          - name: "chore"
+            description: "ビルドや補助ツールなどの変更"
+            value: "chore"
+      - type: "input"
+        key: "Scope"
+        title: "スコープ(任意・空欄可)"
+        initialValue: ""
+      - type: "input"
+        key: "Message"
+        title: "コミットメッセージ"
+        initialValue: ""
+      - type: "confirm"
+        title: "コミット確認"
+        body: "次の内容でコミットします: {{.Form.Type}}{{if .Form.Scope}}({{.Form.Scope}}){{end}}: {{.Form.Message}}"
+    command: "git commit --message '{{.Form.Type}}{{if .Form.Scope}}({{.Form.Scope}}){{end}}: {{.Form.Message}}'"
+    loadingText: "コミットしています..."
+
+  # リモートパネルで P: リモートで削除済みのリモート追跡ブランチを掃除
+  - key: "P"
+    context: "remotes"
+    description: "削除済みのリモート追跡ブランチを掃除 (git remote prune)"
+    command: "git remote prune {{.SelectedRemote.Name}}"
+    loadingText: "リモートを掃除しています..."
+
+  # ファイルパネルで B: 選択中ファイルの git blame を表示
+  - key: "B"
+    context: "files"
+    description: "選択ファイルの blame を表示"
+    command: "git blame --date=short {{.SelectedFile.Name | quote}}"
+    output: terminal
+
+  # ファイルパネルで F: 選択中ファイルの変更履歴(リネーム追跡・差分付き)を表示
+  - key: "F"
+    context: "files"
+    description: "選択ファイルの変更履歴を表示"
+    command: "git log --follow --patch -- {{.SelectedFile.Name | quote}}"
+    output: terminal
+
+# ---------------------------------------------------------------------------
+# キーバインドを変更したい場合の例(デフォルトのままなら不要)
+#   一覧: https://github.com/jesseduffield/lazygit/blob/master/docs/keybindings
+# ---------------------------------------------------------------------------
+# keybinding:
+#   universal:
+#     quit: "q"
+#     return: "<esc>"
+#     nextTab: "]"
+#     prevTab: "["
