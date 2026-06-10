@@ -11,7 +11,7 @@
 | ツール | 用途 | 未導入の場合 |
 | --- | --- | --- |
 | [Nerd Fonts](https://www.nerdfonts.com/)(v3系) | ファイルアイコン等の表示 | `gui.nerdFontsVersion` を `""` にする |
-| [delta](https://github.com/dandavison/delta) | 差分表示の強化(`brew install git-delta` / `cargo install git-delta` 等) | `git.pagers` ブロックをコメントアウト |
+| [delta](https://github.com/dandavison/delta) | 差分表示の強化(`brew install git-delta` / `cargo install git-delta` 等) | `git.paging` ブロックをコメントアウト |
 
 > ライトテーマの端末を使っている場合は、`git.pagers` の `--dark` を `--light` に変更してください。
 
@@ -72,11 +72,21 @@ lazygit --use-config-file ~/lazygit-config/config.yml
 - `gui.statusPanelView` — ステータスパネルに全ブランチのログを表示
 - `gui.authorColors` / `gui.mouseEvents` / `gui.sidePanelWidth` / `keybinding` — 見た目・操作の微調整
 
+## トラブルシューティング
+
+### delta の差分表示にならない
+
+1. delta がインストールされているか確認: `delta --version`(なければ `brew install git-delta` 等)
+2. 設定ファイルが読み込まれているか確認: `lazygit --print-config-dir` が示す場所に `config.yml` があるか
+3. ライトテーマの端末では `git.paging` の `--dark` を `--light` に変更
+4. それでも直らない場合は `lazygit --version` を確認(かなり古いバージョンでは一部の設定キー自体が存在しません)
+
 ## 補足
 
-- **2026年時点の最新安定版の lazygit を想定しています。** `git.pagers`(配列形式)などの新しいキーを
-  使用しているため、古いバージョンでは起動時に設定エラーになることがあります。その場合は
-  `git.pagers` を旧来の `git.paging`(単一オブジェクト)形式に読み替えてください。
+- **差分表示の設定は、新旧どのバージョンでも動く `git.paging` 形式で記述しています。**
+  lazygit v0.56.0 以降では初回起動時に新形式 `git.pagers`(配列)へ自動移行され、
+  `config.yml` がその場で書き換えられます(正常な動作です)。シンボリックリンク運用の
+  場合はリポジトリに差分が出るので、そのままコミットしてください。
 - 1 行目の `yaml-language-server` コメントにより、VSCode(YAML 拡張)などでは公式スキーマによる補完・検証が効きます。
 - 全設定項目のリファレンスは公式ドキュメントを参照してください:
   - [Config.md](https://github.com/jesseduffield/lazygit/blob/master/docs/Config.md)(全設定項目)
