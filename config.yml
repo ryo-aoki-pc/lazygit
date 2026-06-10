@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/jesseduffield/lazygit/master/schema/config.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/jesseduffield/lazygit/v0.55.0/schema/config.json
 #
 # lazygit 設定ファイル
 # ====================
@@ -13,7 +13,7 @@
 #   - delta      … git.pagers 用。未導入なら pagers ブロックをコメントアウト
 #
 # 1行目の yaml-language-server コメントにより、VSCode(YAML拡張)などの対応エディタで
-# 入力補完とスキーマ検証が効きます。
+# 入力補完とスキーマ検証が効きます(参照タグはお使いの lazygit のバージョンに合わせて変更可)。
 # ここに書いていない項目はデフォルト値で動きます(デフォルトの再記述はしない方針)。
 #
 # 全設定項目のリファレンス:
@@ -94,11 +94,16 @@ git:
   #   - --paging=never は必須(lazygit が自前のビューに描画するため)
   #   - ライトテーマの端末では --dark を --light に変更
   #   - side-by-side はパネル幅の都合で崩れやすいため非推奨
-  pagers:
-    - colorArg: always
-      pager: delta --dark --paging=never
-      # 行番号付き + クリックでエディタの該当行を開くリッチ版:
-      # pager: delta --dark --paging=never --line-numbers --hyperlinks --hyperlinks-file-link-format="lazygit-edit://{path}:{line}"
+  # 互換性メモ:
+  #   - ここでは全バージョンで動く形式 `paging` を使用(v0.55.0 以前はこの形式のみ対応)
+  #   - v0.56.0 以降では初回起動時に新形式 `pagers`(配列)へ自動移行され、この
+  #     ファイルが書き換えられる(正常な動作。その際は1行目のスキーマ参照タグも
+  #     お使いのバージョンに更新するとエディタ検証が一致する)
+  paging:
+    colorArg: always
+    pager: delta --dark --paging=never
+    # 行番号付き + クリックでエディタの該当行を開くリッチ版:
+    # pager: delta --dark --paging=never --line-numbers --hyperlinks --hyperlinks-file-link-format="lazygit-edit://{path}:{line}"
 
   # コミットメッセージ中の :sparkles: のような絵文字コードを絵文字として表示
   parseEmoji: true
