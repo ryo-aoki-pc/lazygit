@@ -105,6 +105,13 @@ git:
     # 行番号付き + クリックでエディタの該当行を開くリッチ版:
     # pager: delta --dark --paging=never --line-numbers --hyperlinks --hyperlinks-file-link-format="lazygit-edit://{path}:{line}"
 
+  # Windows の場合: lazygit のカスタムページャは Windows 非対応(PTY 制約)のため、
+  # 上の paging の指定では delta は効かない(Git Bash から起動しても不可)。
+  # paging ブロックをコメントアウトし、同梱の windows/lazygit-pager.ps1 を使う
+  # 下記を有効化する(v0.56.0 以降。手順と制限は README のトラブルシューティング参照):
+  # pagers:
+  #   - externalDiffCommand: C:/Users/<ユーザー名>/AppData/Local/lazygit/lazygit-pager.ps1
+
   # コミットメッセージ中の :sparkles: のような絵文字コードを絵文字として表示
   parseEmoji: true
 
