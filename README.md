@@ -11,9 +11,9 @@
 | ツール | 用途 | 未導入の場合 |
 | --- | --- | --- |
 | [Nerd Fonts](https://www.nerdfonts.com/)(v3系) | ファイルアイコン等の表示 | `gui.nerdFontsVersion` を `""` にする |
-| [delta](https://github.com/dandavison/delta) | 差分表示の強化(`brew install git-delta` / `cargo install git-delta` 等) | `git.paging` ブロックをコメントアウト |
+| [delta](https://github.com/dandavison/delta) | 差分表示の強化(`brew install git-delta` / `cargo install git-delta` 等) | `git.pagers` ブロックをコメントアウト |
 
-> - ライトテーマの端末を使っている場合は、`git.paging` の `--dark` を `--light` に変更してください。
+> - ライトテーマの端末を使っている場合は、`git.pagers` の `--dark` を `--light` に変更してください。
 > - **Windows では delta の利用に追加の手順が必要です**(lazygit のカスタムページャが Windows 非対応のため)。
 >   [トラブルシューティング](#windows-で-delta-の差分表示にならない)を参照してください。
 
@@ -46,7 +46,7 @@ lazygit --use-config-file ~/lazygit-config/config.yml
 ### 画面・操作
 
 - **あいまい検索** — `/` での絞り込みが fuzzy match になり、少ないタイプ数で目的の項目に届く
-- **delta による差分表示** — シンタックスハイライト付きの読みやすい diff
+- **delta による差分表示** — 既定は軽量モード(大きな diff でも軽い)。`|` キーで「フル機能 delta → ページャなしの内蔵表示」に切替可能(v0.56.0 以降)
 - **Nerd Fonts アイコン** — ファイル種別などをアイコンで表示
 - **情報量の多い表示** — ブランチ一覧にコミットハッシュ、ファイル一覧に変更行数(+10 −3)、ベースブランチからの遅れ(↓3)を表示
 - **ISO 形式の日付・24時間表記** — `2026-06-10` / `15:04` 形式
@@ -80,8 +80,17 @@ lazygit --use-config-file ~/lazygit-config/config.yml
 
 1. delta がインストールされているか確認: `delta --version`(なければ `brew install git-delta` 等)
 2. 設定ファイルが読み込まれているか確認: `lazygit --print-config-dir` が示す場所に `config.yml` があるか
-3. ライトテーマの端末では `git.paging` の `--dark` を `--light` に変更
-4. それでも直らない場合は `lazygit --version` を確認(かなり古いバージョンでは一部の設定キー自体が存在しません)
+3. ライトテーマの端末では `git.pagers` の `--dark` を `--light` に変更
+4. `lazygit --version` が **v0.55.0 以前**の場合、`git.pagers` は黙って無視されます。lazygit を更新するか、
+   `config.yml` 内のコメントにある旧 `git.paging` 形式に差し替えてください
+
+### delta の動作が重い
+
+- 既定のページャは軽量モード(`--syntax-theme=none`)にしてあります。それでも重い場面では
+  **`|` キーでページャを切り替え**て「ページャなしの内蔵表示」にすると最速になります
+- 逆にじっくり読みたいときは `|` でフル機能 delta(シンタックスハイライトあり)へ
+- WSL の場合、リポジトリが `/mnt/c/...`(Windows 側ファイルシステム)にあると git 自体が
+  大幅に遅くなります。リポジトリを WSL 側(`~/` 以下)に置いてください
 
 ### Windows で delta の差分表示にならない
 
@@ -105,7 +114,7 @@ PowerShell スクリプトを「外部 diff コマンド」として使うこと
 1. delta の導入確認: `delta --version`(なければ `winget install dandavison.delta`)
 2. PowerShell 7 の導入確認: `pwsh --version`(なければ `winget install Microsoft.PowerShell`)
 3. [`windows/lazygit-pager.ps1`](./windows/lazygit-pager.ps1) を `%LOCALAPPDATA%\lazygit\` にコピー
-4. `config.yml` の `git.paging:` ブロックをコメントアウトし、代わりに次を記述
+4. `config.yml` の `git.pagers:` の中身を次の1項目に差し替え
    (`config.yml` 内に同じ内容のコメント例を用意してあります):
 
    ```yaml
@@ -126,10 +135,10 @@ PowerShell スクリプトを「外部 diff コマンド」として使うこと
 
 ## 補足
 
-- **差分表示の設定は、新旧どのバージョンでも動く `git.paging` 形式で記述しています。**
-  lazygit v0.56.0 以降では初回起動時に新形式 `git.pagers`(配列)へ自動移行され、
-  `config.yml` がその場で書き換えられます(正常な動作です)。シンボリックリンク運用の
-  場合はリポジトリに差分が出るので、そのままコミットしてください。
+- **差分表示は lazygit v0.56.0 以降の `git.pagers`(複数ページャ)形式で記述しています。**
+  `|` キーで「軽量 delta → フル機能 delta → ページャなしの内蔵表示」を順に切り替えられます。
+  v0.55.0 以前の lazygit では `pagers` は黙って無視される(delta が効かない)ため、
+  `config.yml` 内のコメントにある旧 `git.paging` 形式に差し替えてください。
 - 1 行目の `yaml-language-server` コメントにより、VSCode(YAML 拡張)などでは公式スキーマによる補完・検証が効きます。
 - 全設定項目のリファレンスは公式ドキュメントを参照してください:
   - [Config.md](https://github.com/jesseduffield/lazygit/blob/master/docs/Config.md)(全設定項目)
