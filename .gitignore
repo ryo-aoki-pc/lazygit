@@ -1,0 +1,9 @@
+# lazygit が実行時に生成する状態ファイル
+state.yml
+github_pull_requests.json
+
+# Claude Code のローカル設定
+.claude/
+
+# Syncthing の同期マーカー
+.stfolder/
