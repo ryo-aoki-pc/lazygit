@@ -10,7 +10,6 @@
 #
 # 前提ツール(詳細は README.md):
 #   - Nerd Fonts … gui.nerdFontsVersion 用。未導入なら "" にする
-#   - delta      … git.pagers 用。未導入なら pagers ブロックをコメントアウト
 #
 # 1行目の yaml-language-server コメントにより、VSCode(YAML拡張)などの対応エディタで
 # 入力補完とスキーマ検証が効きます(参照タグはお使いの lazygit のバージョンに合わせて変更可)。
@@ -90,34 +89,6 @@ gui:
 # Git の挙動
 # ---------------------------------------------------------------------------
 git:
-  # 差分表示を delta で強化(要 https://github.com/dandavison/delta )
-  #   - --paging=never は必須(lazygit が自前のビューに描画するため)
-  #   - ライトテーマの端末では --dark を --light に変更
-  #   - side-by-side はパネル幅の都合で崩れやすいため非推奨
-  # 複数ページャを登録してあり、`|` キーで順に切り替えられる(lazygit v0.56.0 以降):
-  #   1) 軽量 delta … --syntax-theme=none でシンタックスハイライトを無効化。
-  #      大きな diff でもカーソル移動が軽い(色分け・単語単位の差分は残る)
-  #   2) フル機能 delta … シンタックスハイライトあり。じっくり読むとき用
-  #   3) ページャなしの内蔵表示(最速)
-  pagers:
-    - pager: delta --dark --paging=never --syntax-theme=none
-    - pager: delta --dark --paging=never
-      # 行番号付き + クリックでエディタの該当行を開くリッチ版(上の行と差し替え):
-      # pager: delta --dark --paging=never --line-numbers --hyperlinks --hyperlinks-file-link-format="lazygit-edit://{path}:{line}"
-    - {}
-
-  # v0.55.0 以前の lazygit では `pagers` は使えない(黙って無視され delta が効かない)。
-  # その場合は上の pagers ブロックをコメントアウトし、旧形式の下記を有効化する
-  # (1行目のスキーマ参照タグも v0.55.0 に変えるとエディタ検証が一致する):
-  # paging:
-  #   pager: delta --dark --paging=never
-
-  # Windows の場合: lazygit のカスタムページャ(pager 指定)は Windows 非対応(PTY 制約)
-  # のため delta は効かない(Git Bash から起動しても不可)。pagers の中身を、同梱の
-  # windows/lazygit-pager.ps1 を使う下記の1項目に差し替える(手順と制限は README 参照):
-  # pagers:
-  #   - externalDiffCommand: C:/Users/<ユーザー名>/AppData/Local/lazygit/lazygit-pager.ps1
-
   # コミットメッセージ中の :sparkles: のような絵文字コードを絵文字として表示
   parseEmoji: true
 

@@ -11,11 +11,6 @@
 | ツール | 用途 | 未導入の場合 |
 | --- | --- | --- |
 | [Nerd Fonts](https://www.nerdfonts.com/)(v3系) | ファイルアイコン等の表示 | `gui.nerdFontsVersion` を `""` にする |
-| [delta](https://github.com/dandavison/delta) | 差分表示の強化(`brew install git-delta` / `cargo install git-delta` 等) | `git.pagers` ブロックをコメントアウト |
-
-> - ライトテーマの端末を使っている場合は、`git.pagers` の `--dark` を `--light` に変更してください。
-> - **Windows では delta の利用に追加の手順が必要です**(lazygit のカスタムページャが Windows 非対応のため)。
->   [トラブルシューティング](#windows-で-delta-の差分表示にならない)を参照してください。
 
 ## 導入方法
 
@@ -46,7 +41,6 @@ lazygit --use-config-file ~/lazygit-config/config.yml
 ### 画面・操作
 
 - **あいまい検索** — `/` での絞り込みが fuzzy match になり、少ないタイプ数で目的の項目に届く
-- **delta による差分表示** — 既定は軽量モード(大きな diff でも軽い)。`|` キーで「フル機能 delta → ページャなしの内蔵表示」に切替可能(v0.56.0 以降)
 - **Nerd Fonts アイコン** — ファイル種別などをアイコンで表示
 - **情報量の多い表示** — ブランチ一覧にコミットハッシュ、ファイル一覧に変更行数(+10 −3)、ベースブランチからの遅れ(↓3)を表示
 - **ISO 形式の日付・24時間表記** — `2026-06-10` / `15:04` 形式
@@ -74,76 +68,12 @@ lazygit --use-config-file ~/lazygit-config/config.yml
 - `gui.statusPanelView` — ステータスパネルに全ブランチのログを表示
 - `gui.authorColors` / `gui.mouseEvents` / `gui.sidePanelWidth` / `keybinding` — 見た目・操作の微調整
 
-## トラブルシューティング
-
-### delta の差分表示にならない(macOS / Linux / WSL)
-
-1. delta がインストールされているか確認: `delta --version`(なければ `brew install git-delta` 等)
-2. 設定ファイルが読み込まれているか確認: `lazygit --print-config-dir` が示す場所に `config.yml` があるか
-3. ライトテーマの端末では `git.pagers` の `--dark` を `--light` に変更
-4. `lazygit --version` が **v0.55.0 以前**の場合、`git.pagers` は黙って無視されます。lazygit を更新するか、
-   `config.yml` 内のコメントにある旧 `git.paging` 形式に差し替えてください
-
-### delta の動作が重い
-
-- 既定のページャは軽量モード(`--syntax-theme=none`)にしてあります。それでも重い場面では
-  **`|` キーでページャを切り替え**て「ページャなしの内蔵表示」にすると最速になります
-- 逆にじっくり読みたいときは `|` でフル機能 delta(シンタックスハイライトあり)へ
-- WSL の場合、リポジトリが `/mnt/c/...`(Windows 側ファイルシステム)にあると git 自体が
-  大幅に遅くなります。リポジトリを WSL 側(`~/` 以下)に置いてください
-
-### Windows で delta の差分表示にならない
-
-設定ミスではなく lazygit 本体の制約です。**lazygit のカスタムページャ(delta 等)は Windows では非対応**で、
-最新版でも同じです(diff をページャへ渡すのに使う PTY ライブラリが Windows 未対応のため。
-**Git Bash から起動しても回避できず、lazygit を更新しても直りません**)。
-ターミナルの `git diff` で delta が効いていても、lazygit 内では効かないのはこのためです。
-
-- 参考: [Custom_Pagers.md](https://github.com/jesseduffield/lazygit/blob/master/docs/Custom_Pagers.md)
-  ("Support does not extend to Windows users…")、
-  [#2300](https://github.com/jesseduffield/lazygit/issues/2300) /
-  [#2337](https://github.com/jesseduffield/lazygit/issues/2337) /
-  [#1453](https://github.com/jesseduffield/lazygit/issues/1453)(blocked)/
-  [discussion #3241](https://github.com/jesseduffield/lazygit/discussions/3241)
-
-#### 公式の回避策(lazygit v0.56.0 以降)
-
-PowerShell スクリプトを「外部 diff コマンド」として使うことで delta 表示を再現できます。
-このリポジトリに公式スクリプト([`windows/lazygit-pager.ps1`](./windows/lazygit-pager.ps1))を同梱しています。
-
-1. delta の導入確認: `delta --version`(なければ `winget install dandavison.delta`)
-2. PowerShell 7 の導入確認: `pwsh --version`(なければ `winget install Microsoft.PowerShell`)
-3. [`windows/lazygit-pager.ps1`](./windows/lazygit-pager.ps1) を `%LOCALAPPDATA%\lazygit\` にコピー
-4. `config.yml` の `git.pagers:` の中身を次の1項目に差し替え
-   (`config.yml` 内に同じ内容のコメント例を用意してあります):
-
-   ```yaml
-   git:
-     pagers:
-       - externalDiffCommand: C:/Users/<ユーザー名>/AppData/Local/lazygit/lazygit-pager.ps1
-   ```
-
-5. lazygit を再起動
-
-既知の制限: **リネームが「旧ファイルの変更」として表示されます**(ハンクヘッダのみの問題で、差分の内容自体は正しい)。
-
-なお、**WSL(Ubuntu 等)上で lazygit を使う場合は回避策なしで delta が正規に動作**します(最も確実な方法)。
-
-> 補足: lazygit を介さずターミナル単体で delta の表示が崩れる・文字化けする場合は、古い `less.exe` が
-> 原因のことが多く、[jftuga/less-Windows](https://github.com/jftuga/less-Windows/releases/latest) の
-> 新しい `less.exe` への更新が delta 公式の推奨です。
-
 ## 補足
 
-- **差分表示は lazygit v0.56.0 以降の `git.pagers`(複数ページャ)形式で記述しています。**
-  `|` キーで「軽量 delta → フル機能 delta → ページャなしの内蔵表示」を順に切り替えられます。
-  v0.55.0 以前の lazygit では `pagers` は黙って無視される(delta が効かない)ため、
-  `config.yml` 内のコメントにある旧 `git.paging` 形式に差し替えてください。
 - 1 行目の `yaml-language-server` コメントにより、VSCode(YAML 拡張)などでは公式スキーマによる補完・検証が効きます。
 - 全設定項目のリファレンスは公式ドキュメントを参照してください:
   - [Config.md](https://github.com/jesseduffield/lazygit/blob/master/docs/Config.md)(全設定項目)
   - [Custom_Command_Keybindings.md](https://github.com/jesseduffield/lazygit/blob/master/docs/Custom_Command_Keybindings.md)(カスタムコマンド)
-  - [Custom_Pagers.md](https://github.com/jesseduffield/lazygit/blob/master/docs/Custom_Pagers.md)(delta 等のページャ設定。Windows 向け回避策の原典もここ)
 
 ## このリポジトリの運用
 
