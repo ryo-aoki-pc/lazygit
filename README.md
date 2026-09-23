@@ -147,4 +147,12 @@ PowerShell スクリプトを「外部 diff コマンド」として使うこと
 
 ## このリポジトリの運用
 
-- デフォルトブランチは `main` です。設定の変更はトピックブランチを切って Pull Request で取り込みます。
+| ブランチ | 内容 |
+| --- | --- |
+| `custom`(デフォルト) | このブランチ。`main` の上に自分用のカスタマイズを積んだもの |
+| `main` | lazygit 公式のデフォルト設定([docs/Config.md](https://github.com/jesseduffield/lazygit/blob/master/docs/Config.md) の Default セクション)をそのまま置いた upstream 追従ブランチ。直接編集しない |
+
+- 設定の変更は `custom` からトピックブランチを切って Pull Request で取り込みます。
+- 公式デフォルトからのカスタマイズ差分は `git diff main custom -- config.yml`(コミット単位なら `git log --oneline main..custom`)で確認できます。
+- upstream(lazygit の新バージョン)への追従は、`main` で [`scripts/fetch-upstream-config.sh`](./scripts/fetch-upstream-config.sh) を実行してコミットし、
+  `custom` を `git rebase main` で載せ直します(手順の詳細は `main` ブランチの README を参照)。
