@@ -1,7 +1,7 @@
 # lazygit 設定ファイル
 
 [lazygit](https://github.com/jesseduffield/lazygit) を便利に使うための設定ファイル([`config.yml`](./config.yml))です。
-各設定には日本語のコメントを付けてあるので、好みに合わせて調整してください。
+`main` ブランチ(lazygit 公式のデフォルト設定)の `config.yml` を丸ごとベースにし、変更した項目にだけ日本語のコメントを付けてあります。
 公式の JSON スキーマ([schema/config.json](https://github.com/jesseduffield/lazygit/blob/master/schema/config.json))で検証済みです。
 
 ## 前提ツール
@@ -58,9 +58,9 @@ lazygit --use-config-file ~/lazygit-config/config.yml
 | `B` | ファイルパネル | 選択ファイルの `git blame` を表示 |
 | `F` | ファイルパネル | 選択ファイルの変更履歴をリネーム追跡・差分付きで表示 |
 
-### コメントアウトで用意してあるオプション
+### 必要になったら検討する項目
 
-必要に応じてコメントを外して使ってください。
+`config.yml` には書いていません(デフォルトのまま)。使うときは `config.yml` 内の該当キーの値を書き換えてください。
 
 - `os.editPreset` — `e` キーで開くエディタの指定(未指定なら `$EDITOR` 等から自動判定)
 - `os.copyToClipboardCmd` — SSH 先や tmux 内でも OSC52 でローカルのクリップボードへコピー
@@ -71,7 +71,6 @@ lazygit --use-config-file ~/lazygit-config/config.yml
 
 ## 補足
 
-- 1 行目の `yaml-language-server` コメントにより、VSCode(YAML 拡張)などでは公式スキーマによる補完・検証が効きます。
 - 全設定項目のリファレンスは公式ドキュメントを参照してください:
   - [Config.md](https://github.com/jesseduffield/lazygit/blob/master/docs/Config.md)(全設定項目)
   - [Custom_Command_Keybindings.md](https://github.com/jesseduffield/lazygit/blob/master/docs/Custom_Command_Keybindings.md)(カスタムコマンド)
@@ -85,5 +84,6 @@ lazygit --use-config-file ~/lazygit-config/config.yml
 
 - 設定の変更は `custom` からトピックブランチを切って Pull Request で取り込みます。
 - 公式デフォルトからのカスタマイズ差分は `git diff main custom -- config.yml`(コミット単位なら `git log --oneline main..custom`)で確認できます。
+- `custom` の `config.yml` は `main` と同じ全項目形式のまま、変えたい値だけを書き換えます(項目の削除・並べ替え・独自ヘッダの追加はしない)。変更した値の直上に日本語コメントを 1 行付けます。
 - upstream(lazygit の新バージョン)への追従は、`main` で [`scripts/fetch-upstream-config.sh`](./scripts/fetch-upstream-config.sh) を実行してコミットし、
   `custom` を `git rebase main` で載せ直します(手順の詳細は `main` ブランチの README を参照)。
