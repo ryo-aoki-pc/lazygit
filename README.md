@@ -46,6 +46,7 @@ lazygit --use-config-file ~/lazygit-config/config.yml
 - **ISO 形式の日付・24時間表記** — `2026-06-10` / `15:04` 形式
 - **快適なスクロールとタブ切替** — スクロール量を増加、パネル番号キー(1〜5)の再押下でタブ切替
 - **フォーカスパネルの自動拡大**、絵文字コード(`:sparkles:` 等)の表示
+- **マウス操作の無効化** — ターミナル側のテキスト選択・コピーをそのまま使える
 - **外部エディタから戻るときの Enter 不要**、起動時ポップアップもオフ
 
 ### カスタムコマンド
@@ -66,7 +67,7 @@ lazygit --use-config-file ~/lazygit-config/config.yml
 - `git.commitPrefix` — ブランチ名(例: `feature/JIRA-123`)からコミットメッセージの接頭辞を自動入力
 - `git.mainBranches` / `git.autoForwardBranches` — develop 運用や全ブランチ自動 fast-forward
 - `gui.statusPanelView` — ステータスパネルに全ブランチのログを表示
-- `gui.authorColors` / `gui.mouseEvents` / `gui.sidePanelWidth` / `keybinding` — 見た目・操作の微調整
+- `gui.authorColors` / `gui.sidePanelWidth` / `keybinding` — 見た目・操作の微調整
 
 ## 補足
 
