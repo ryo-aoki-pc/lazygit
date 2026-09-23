@@ -599,74 +599,7 @@ disableStartupPopups: true
 
 # User-configured commands that can be invoked from within Lazygit
 # See https://github.com/jesseduffield/lazygit/blob/master/docs/Custom_Command_Keybindings.md
-customCommands:
-  # Ctrl+V: Conventional Commits 形式のコミットを対話形式で作成
-  - key: "<c-v>"
-    context: "global"
-    description: "Conventional Commit を作成"
-    prompts:
-      - type: "menu"
-        key: "Type"
-        title: "変更の種類"
-        options:
-          - name: "feat"
-            description: "新機能"
-            value: "feat"
-          - name: "fix"
-            description: "バグ修正"
-            value: "fix"
-          - name: "docs"
-            description: "ドキュメントのみの変更"
-            value: "docs"
-          - name: "style"
-            description: "動作に影響しない変更(フォーマット等)"
-            value: "style"
-          - name: "refactor"
-            description: "リファクタリング"
-            value: "refactor"
-          - name: "perf"
-            description: "パフォーマンス改善"
-            value: "perf"
-          - name: "test"
-            description: "テストの追加・修正"
-            value: "test"
-          - name: "chore"
-            description: "ビルドや補助ツールなどの変更"
-            value: "chore"
-      - type: "input"
-        key: "Scope"
-        title: "スコープ(任意・空欄可)"
-        initialValue: ""
-      - type: "input"
-        key: "Message"
-        title: "コミットメッセージ"
-        initialValue: ""
-      - type: "confirm"
-        title: "コミット確認"
-        body: "次の内容でコミットします: {{.Form.Type}}{{if .Form.Scope}}({{.Form.Scope}}){{end}}: {{.Form.Message}}"
-    command: "git commit --message '{{.Form.Type}}{{if .Form.Scope}}({{.Form.Scope}}){{end}}: {{.Form.Message}}'"
-    loadingText: "コミットしています..."
-
-  # リモートパネルで P: リモートで削除済みのリモート追跡ブランチを掃除
-  - key: "P"
-    context: "remotes"
-    description: "削除済みのリモート追跡ブランチを掃除 (git remote prune)"
-    command: "git remote prune {{.SelectedRemote.Name}}"
-    loadingText: "リモートを掃除しています..."
-
-  # ファイルパネルで B: 選択中ファイルの git blame を表示
-  - key: "B"
-    context: "files"
-    description: "選択ファイルの blame を表示"
-    command: "git blame --date=short {{.SelectedFile.Name | quote}}"
-    output: terminal
-
-  # ファイルパネルで F: 選択中ファイルの変更履歴(リネーム追跡・差分付き)を表示
-  - key: "F"
-    context: "files"
-    description: "選択ファイルの変更履歴を表示"
-    command: "git log --follow --patch -- {{.SelectedFile.Name | quote}}"
-    output: terminal
+customCommands: []
 
 # See https://github.com/jesseduffield/lazygit/blob/master/docs/Config.md#custom-pull-request-urls
 services: {}

@@ -49,15 +49,6 @@ lazygit --use-config-file ~/lazygit-config/config.yml
 - **マウス操作の無効化** — ターミナル側のテキスト選択・コピーをそのまま使える
 - **外部エディタから戻るときの Enter 不要**、起動時ポップアップもオフ
 
-### カスタムコマンド
-
-| キー | 使える場所 | 動作 |
-| --- | --- | --- |
-| `Ctrl+V` | どこでも | Conventional Commits 形式(`feat: ...` など)のコミットを対話形式で作成 |
-| `P` | リモートパネル | リモートで削除済みのブランチ参照を掃除(`git remote prune`) |
-| `B` | ファイルパネル | 選択ファイルの `git blame` を表示 |
-| `F` | ファイルパネル | 選択ファイルの変更履歴をリネーム追跡・差分付きで表示 |
-
 ### 必要になったら検討する項目
 
 `config.yml` には書いていません(デフォルトのまま)。使うときは `config.yml` 内の該当キーの値を書き換えてください。
@@ -73,7 +64,6 @@ lazygit --use-config-file ~/lazygit-config/config.yml
 
 - 全設定項目のリファレンスは公式ドキュメントを参照してください:
   - [Config.md](https://github.com/jesseduffield/lazygit/blob/master/docs/Config.md)(全設定項目)
-  - [Custom_Command_Keybindings.md](https://github.com/jesseduffield/lazygit/blob/master/docs/Custom_Command_Keybindings.md)(カスタムコマンド)
 
 ## このリポジトリの運用
 
