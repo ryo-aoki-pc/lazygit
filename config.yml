@@ -56,6 +56,9 @@ gui:
   timeFormat: "2006-01-02"
   shortTimeFormat: "15:04"
 
+  # マウス操作を無効化(ターミナル側のテキスト選択・コピーをそのまま使えるようにする)
+  mouseEvents: false
+
   # 配色(色名のほか '#RRGGBB' 形式も使用可能)
   theme:
     activeBorderColor:
@@ -73,9 +76,6 @@ gui:
 
   # ステータスパネルに全ブランチのログを表示したい場合(デフォルト: dashboard)
   # statusPanelView: allBranchesLog
-
-  # ターミナルのテキスト選択を優先したい場合はマウス操作を無効化(デフォルト: 有効)
-  # mouseEvents: false
 
   # サイドパネルを狭くしたい場合(デフォルト: 0.3333)
   # sidePanelWidth: 0.2
