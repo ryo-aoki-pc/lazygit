@@ -2,7 +2,7 @@
 
 [lazygit](https://github.com/jesseduffield/lazygit) を便利に使うための設定ファイル([`config.yml`](./config.yml))です。
 `main` ブランチ(lazygit 公式のデフォルト設定)の `config.yml` を丸ごとベースにし、変更した項目にだけ日本語のコメントを付けてあります。
-公式の JSON スキーマ([schema/config.json](https://github.com/jesseduffield/lazygit/blob/master/schema/config.json))で検証済みです。
+lazygit 0.66.0 の公式 JSON スキーマ([schema/config.json](https://github.com/jesseduffield/lazygit/blob/v0.66.0/schema/config.json))と、新規 AlmaLinux 10.2 VM の実 TUI で検証済みです。
 
 ## 前提ツール
 
@@ -58,7 +58,7 @@ lazygit --use-config-file ~/lazygit-config/config.yml
 - `git.commitPrefix` — ブランチ名(例: `feature/JIRA-123`)からコミットメッセージの接頭辞を自動入力
 - `git.mainBranches` / `git.autoForwardBranches` — develop 運用や全ブランチ自動 fast-forward
 - `gui.statusPanelView` — ステータスパネルに全ブランチのログを表示
-- `gui.authorColors` / `gui.sidePanelWidth` / `keybinding` — 見た目・操作の微調整
+- `gui.theme.authorColors` / `gui.sidePanelWidth` / `keybinding` — 見た目・操作の微調整
 
 ## 補足
 
@@ -74,6 +74,16 @@ lazygit --use-config-file ~/lazygit-config/config.yml
 
 - 設定の変更は `custom` からトピックブランチを切って Pull Request で取り込みます。
 - 公式デフォルトからのカスタマイズ差分は `git diff main custom -- config.yml`(コミット単位なら `git log --oneline main..custom`)で確認できます。
-- `custom` の `config.yml` は `main` と同じ全項目形式のまま、変えたい値だけを書き換えます(項目の削除・並べ替え・独自ヘッダの追加はしない)。変更した値の直上に日本語コメントを 1 行付けます。
+- `custom` の `config.yml` は `main` の全項目形式を保ち、変えたい値だけを書き換えます(項目の削除・並べ替え・独自ヘッダの追加はしない)。版の互換性に必要なキーの改名・移動は下の検証記録に残します。変更した値の直上に日本語コメントを 1 行付けます。
 - upstream(lazygit の新バージョン)への追従は、`main` で [`scripts/fetch-upstream-config.sh`](./scripts/fetch-upstream-config.sh) を実行してコミットし、
   `custom` を `git rebase main` で載せ直します(手順の詳細は `main` ブランチの README を参照)。
+
+## 新規 AlmaLinux VM での検証（2026-10-06）
+
+- AlmaLinux 10.2 Workstation の x86_64 新規 VM へ Homebrew 7.0.8 / lazygit 0.66.0 を入れ、本文の公開 URL から `dc3873e` を clone して `~/.config/lazygit/config.yml` のリンクを作った。SSH の対話 PTY で試験用 git リポジトリを開き、変更行数・ファイルツリー・差分の表示と `q` の終了を確認した
+- 初回起動は 4 キーを自動移行し、リンク先の `config.yml` を書き換えた。新規 clone に不要な変更が残らないよう、設定の値とコメントを保持して次の互換修正を適用した
+  - `gui.wrapLinesInStagingView` → `gui.wrapLinesInDiffView`
+  - `gui.useHunkModeInStagingView` → `gui.useHunkModeInDiffView`
+  - `gui.authorColors` / `gui.branchColorPatterns` → `gui.theme` 配下の同名キー
+- 修正ファイルを同じ VM に転送して起動し直すと、自動移行の通知が無く、起動前後の設定の SHA256 は一致した。v0.66.0 の公式タグの JSON Schema への照合もエラー 0 件だった
+- この確認は Linux の clone・リンク・実 TUI と設定互換性。macOS / Windows、upstream の main 更新・rebase・GitHub への push は実行していない。フォントのグリフの見た目は GUI では確認していない
