@@ -367,7 +367,12 @@ git:
   #
   # See https://github.com/jesseduffield/lazygit/blob/master/docs/Custom_DiffRenderers.md
   # for more information.
-  diffRenderers: []
+  # 構文ハイライトを省いた delta で左右比較し、| キーで内蔵表示へ切り替え
+  diffRenderers:
+    - command: delta --no-gitconfig --dark --paging=never --syntax-theme=none --tabs=4 --side-by-side
+      name: delta side-by-side
+    - type: rawGit
+      name: default
 
   # Config relating to committing
   commit:
