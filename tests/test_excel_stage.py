@@ -345,6 +345,7 @@ class ExcelStageTests(unittest.TestCase):
         self.edit({("売上", "A1"): "キャンセル"}, path=path)
         before = self.index_bytes()
         stdout = self.git("excel-stage", "--", path.name, cwd=folder, env=cli_env)
+        self.assertIn("Excel を読み込んでいます", stdout.decode("utf-8"))
         self.assertIn("選択を取り消しました", stdout.decode("utf-8"))
         launch = json.loads(capture.read_text(encoding="utf-8"))
         self.assertEqual(launch["path"], "subdirectory/" + path.name)
@@ -354,6 +355,18 @@ class ExcelStageTests(unittest.TestCase):
         self.assertIn("--side-by-side", launch["config"]["git"]["diffRenderers"][0]["command"])
         self.assertFalse(Path(launch["cwd"]).exists(), "cancelled session must be cleaned up")
         self.assertEqual(self.index_bytes(), before)
+
+    def test_reading_progress_is_shown_only_for_supported_workbooks(self):
+        self.edit({("売上", "A1"): "読み込み中の表示"})
+        messages = []
+        self.stage.prepare_session(self.repo, self.path.name, self.directory / "progress", progress=messages.append)
+        self.assertEqual(len(messages), 1)
+        self.assertIn("読み込んでいます", messages[0])
+        rejected = []
+        with self.assertRaises(ValueError) as context:
+            self.stage.prepare_session(self.repo, "notes.txt", self.directory / "text", progress=rejected.append)
+        self.assertEqual(rejected, [])
+        self.assertIn("それ以外のファイルは全体をステージ", str(context.exception))
 
     def test_cancel_and_apply_with_no_selection_preserve_index_exactly(self):
         self.edit({("売上", "A1"): "選ばない"})

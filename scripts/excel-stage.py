@@ -76,12 +76,12 @@ def write_json(path, value):
     os.replace(temporary, path)
 
 
-def prepare_session(repo, relative, directory):
+def prepare_session(repo, relative, directory, progress=None):
     """Capture the workbook pair and create the isolated text selection repo."""
     repo, directory = Path(repo).resolve(), Path(directory).resolve()
     relative = str(relative)
     if Path(relative).suffix.lower() not in SUPPORTED:
-        raise StageError("部分ステージの対象は .xlsx / .xlsm / .xltx / .xltm です。旧形式は全体をステージしてください。")
+        raise StageError("部分ステージの対象は .xlsx / .xlsm / .xltx / .xltm です。それ以外のファイルは全体をステージしてください。")
     work_path = repo / relative
     try:
         normalized = work_path.resolve().relative_to(repo).as_posix()
@@ -99,6 +99,9 @@ def prepare_session(repo, relative, directory):
         raise StageError("新規ファイルは Excel 全体をステージしてください。既存ファイルのセル変更が対象です。")
     base_data = git(repo, "cat-file", "blob", oid, env=env).stdout
     work_data = work_path.read_bytes()
+    if progress is not None:
+        # Reading a large workbook takes seconds with nothing else on screen.
+        progress("Excel を読み込んでいます。大きいブックでは選択画面が開くまで時間がかかります。")
     base, work = Workbook(base_data), Workbook(work_data)
     base.assert_compatible(work)
     baseline, changed = base.projection(work), work.projection(base)
@@ -275,7 +278,7 @@ def main(argv=None):
         path = str(Path(prefix) / args.file) if prefix else args.file
         with tempfile.TemporaryDirectory(prefix="lazygit-excel-stage-") as temporary:
             directory = Path(temporary)
-            prepare_session(repo, path, directory)
+            prepare_session(repo, path, directory, progress=lambda message: print(message, flush=True))
             result = run_picker(directory)
             state = json.loads((directory / "session.json").read_text(encoding="utf-8"))
             print("Excel の部分ステージを反映しました。" if state["applied"] else "選択を取り消しました。Excel のインデックスは変更していません。")
