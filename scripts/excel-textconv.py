@@ -19,6 +19,9 @@ OLE_SIGNATURE = b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1"
 # finished by the background worker so Git (and lazygit) never wait for it.
 DEFAULT_TIMEOUT = 2.0
 TIMEOUT_VARIABLE = "EXCEL_TEXTCONV_TIMEOUT"
+# Twice the fastest rate measured (about 4 MB/s of sheet XML on a Ryzen AI
+# MAX+ 395), so only workbooks that cannot finish in time skip the wait.
+OPTIMISTIC_BYTES_PER_SECOND = 8 * 1024 * 1024
 CACHE_LIMIT_BYTES = 512 * 1024 * 1024
 CACHE_MAX_AGE = 30 * 24 * 3600
 PRUNE_INTERVAL = 3600
@@ -200,6 +203,23 @@ def timeout_seconds():
         return DEFAULT_TIMEOUT
 
 
+def input_size(data):
+    """Bytes the converter has to parse: the unpacked sheets of an .xlsx."""
+    if data.startswith(b"PK"):
+        import zipfile
+
+        try:
+            with zipfile.ZipFile(io.BytesIO(data)) as archive:
+                return sum(
+                    info.file_size for info in archive.infolist()
+                    if info.filename.startswith("xl/worksheets/")
+                    or info.filename == "xl/sharedStrings.xml"
+                )
+        except zipfile.BadZipFile:
+            return 0  # convert() reports the broken file.
+    return len(data)
+
+
 def sheet_titles(data):
     """Read only the sheet names, which is fast even for a large workbook."""
     try:
@@ -238,6 +258,14 @@ def placeholder(key, data):
     return "\n".join(lines) + "\n"
 
 
+def take_lock(lock):
+    try:
+        os.close(os.open(lock, os.O_CREAT | os.O_EXCL | os.O_WRONLY))
+    except FileExistsError:
+        return False
+    return True
+
+
 def worker_running(lock):
     try:
         return time.time() - lock.stat().st_mtime < WORKER_STALE
@@ -252,6 +280,10 @@ def start_worker(cache_dir):
     if worker_running(lock):
         return
     lock.unlink(missing_ok=True)
+    # Take the lock for the worker before it starts, so requests arriving
+    # while it is still starting up do not start more workers.
+    if not take_lock(lock):
+        return
     options = {}
     if os.name == "nt":
         options["creationflags"] = (
@@ -261,15 +293,19 @@ def start_worker(cache_dir):
         )
     else:
         options["start_new_session"] = True
-    # Do not inherit Git's stdout pipe: Git would otherwise wait for the worker.
-    subprocess.Popen(
-        [sys.executable, str(Path(__file__).resolve()), "--worker", "--cache-dir", str(cache_dir)],
-        stdin=subprocess.DEVNULL,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-        close_fds=True,
-        **options,
-    )
+    try:
+        # Do not inherit Git's stdout pipe: Git would otherwise wait for the worker.
+        subprocess.Popen(
+            [sys.executable, str(Path(__file__).resolve()), "--worker", "--cache-dir", str(cache_dir)],
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            close_fds=True,
+            **options,
+        )
+    except OSError:
+        lock.unlink(missing_ok=True)
+        raise
 
 
 def request_conversion(cache_dir, key, data):
@@ -297,6 +333,10 @@ def cached_convert(data, cache_dir):
     if timeout > 0 and pending.exists() and worker_running(cache_dir / "worker.lock"):
         # Already queued: answer at once instead of converting it twice.
         os.utime(pending)
+        return placeholder(key, data), False
+    if timeout > 0 and input_size(data) > timeout * OPTIMISTIC_BYTES_PER_SECOND:
+        # Too large to finish in time: do not spend the wait on it.
+        request_conversion(cache_dir, key, data)
         return placeholder(key, data), False
     import threading
 
@@ -342,11 +382,13 @@ def run_worker(cache_dir):
     lock = cache_dir / "worker.lock"
     if os.name != "nt":
         os.nice(10)
-    while next_request(cache_dir) is not None:
-        try:
-            os.close(os.open(lock, os.O_CREAT | os.O_EXCL | os.O_WRONLY))
-        except FileExistsError:
+    # start_worker took the lock for this process.
+    lock.touch()
+    owned = True
+    while owned or next_request(cache_dir) is not None:
+        if not owned and not take_lock(lock):
             return 0  # Another worker owns the queue.
+        owned = False
         stop = threading.Event()
 
         def heartbeat():
