@@ -4,6 +4,7 @@ Run with: python3 -m unittest discover -s lazygit/tests -v
 """
 
 import datetime as dt
+import hashlib
 import io
 import os
 from pathlib import Path
@@ -12,6 +13,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
 import xml.etree.ElementTree as ET
 import zipfile
@@ -50,23 +52,25 @@ def isolated_env(home):
     return env
 
 
-class ConverterTests(unittest.TestCase):
+class ConverterTestCase(unittest.TestCase):
     def setUp(self):
         directory = tempfile.TemporaryDirectory(prefix="excel-textconv-")
         self.addCleanup(directory.cleanup)
         self.directory = Path(directory.name)
 
-    def convert(self, path, *, expected_returncode=0, env=None):
+    def convert(self, path, *, expected_returncode=0, env=None, options=()):
         result = subprocess.run(
-            [sys.executable, str(CONVERTER), str(path)],
+            [sys.executable, str(CONVERTER), *options, str(path)],
             capture_output=True,
             encoding="utf-8",
             env=env,
-            timeout=20,
+            timeout=120,
         )
         self.assertEqual(result.returncode, expected_returncode, result.stderr)
         return result
 
+
+class ConverterTests(ConverterTestCase):
     def test_japanese_sheets_formulas_and_multiline_cells(self):
         path = self.directory / "売上 表.xlsx"
         save_book(path)
@@ -194,6 +198,111 @@ class ConverterTests(unittest.TestCase):
                 self.assertNotIn("Traceback", result.stderr)
 
 
+class CacheTests(ConverterTestCase):
+    """--cache-dir: reuse results and finish slow conversions in the background."""
+
+    def setUp(self):
+        super().setUp()
+        self.cache = self.directory / "キャッシュ 置き場"
+        self.options = ("--cache-dir", str(self.cache))
+        self.wait_env = os.environ.copy()
+        self.wait_env["EXCEL_TEXTCONV_TIMEOUT"] = "0"
+        self.slow_env = os.environ.copy()
+        self.slow_env["EXCEL_TEXTCONV_TIMEOUT"] = "0.001"
+
+    def key(self, path):
+        return hashlib.sha256(path.read_bytes()).hexdigest()
+
+    def hold_worker_lock(self):
+        # A fresh lock means "a worker is running", so no real worker starts.
+        self.cache.mkdir(parents=True, exist_ok=True)
+        (self.cache / "worker.lock").touch()
+
+    def run_worker(self):
+        (self.cache / "worker.lock").unlink()
+        subprocess.run(
+            [sys.executable, str(CONVERTER), "--worker", *self.options], check=True, timeout=120
+        )
+
+    def wait_for(self, path):
+        deadline = time.monotonic() + 120
+        while not path.exists():
+            self.assertLess(time.monotonic(), deadline, "background conversion did not finish")
+            time.sleep(0.1)
+
+    def test_cached_text_is_reused(self):
+        path = self.directory / "売上.xlsx"
+        save_book(path)
+        expected = self.convert(path).stdout
+        self.assertEqual(self.convert(path, env=self.wait_env, options=self.options).stdout, expected)
+        cached = self.cache / (self.key(path) + ".txt")
+        self.assertEqual(cached.read_text(encoding="utf-8"), expected)
+        cached.write_text("cached\n", encoding="utf-8")
+        self.assertEqual(self.convert(path, options=self.options).stdout, "cached\n")
+
+    def test_slow_conversion_finishes_in_background_without_holding_git(self):
+        path = self.directory / "大きい.xlsx"
+        book = Workbook()
+        for row in range(1, 2001):
+            book.active.append([row * 10 + column for column in range(10)])
+        book.save(path)
+        book.close()
+        expected = self.convert(path).stdout
+        key = self.key(path)
+        started = time.monotonic()
+        result = self.convert(path, env=self.slow_env, options=self.options)
+        self.assertLess(time.monotonic() - started, 15)
+        self.assertEqual(
+            result.stdout.splitlines()[0], "# Excel を変換中です (sha256 " + key[:16] + ")"
+        )
+        # The command returned while the detached worker was still converting.
+        cached = self.cache / (key + ".txt")
+        self.assertFalse(cached.exists())
+        self.wait_for(cached)
+        self.assertEqual(self.convert(path, options=self.options).stdout, expected)
+        deadline = time.monotonic() + 30
+        while (self.cache / "worker.lock").exists() and time.monotonic() < deadline:
+            time.sleep(0.1)
+        self.assertEqual(sorted(p.suffix for p in self.cache.iterdir() if p.suffix != ""), [".txt"])
+
+    def test_queued_requests_answer_at_once_and_the_worker_converts_them(self):
+        path = self.directory / "待ち.xlsx"
+        save_book(path)
+        self.hold_worker_lock()
+        first = self.convert(path, env=self.slow_env, options=self.options).stdout
+        self.assertTrue(first.startswith("# Excel を変換中です"))
+        self.assertTrue(first.endswith('Sheet: "売上"\nSheet: "備考"\n'))
+        self.assertTrue((self.cache / (self.key(path) + ".in")).exists())
+        self.assertEqual(self.convert(path, env=self.slow_env, options=self.options).stdout, first)
+        self.run_worker()
+        self.assertFalse((self.cache / (self.key(path) + ".in")).exists())
+        self.assertEqual(self.convert(path, options=self.options).stdout, self.convert(path).stdout)
+
+    def test_background_failure_is_reported_like_a_direct_failure(self):
+        path = self.directory / "破損.xlsx"
+        path.write_bytes(b"PK\x03\x04truncated")
+        self.hold_worker_lock()
+        self.assertTrue(
+            self.convert(path, env=self.slow_env, options=self.options).stdout.startswith(
+                "# Excel を変換中です"
+            )
+        )
+        self.run_worker()
+        result = self.convert(path, expected_returncode=1, options=self.options)
+        self.assertEqual(result.stdout, "")
+        self.assertIn("Excel の差分変換に失敗しました:", result.stderr)
+        self.assertNotIn("Traceback", result.stderr)
+
+    def test_waits_for_the_result_when_the_timeout_is_zero(self):
+        path = self.directory / "待つ.xlsx"
+        save_book(path)
+        self.hold_worker_lock()
+        self.assertEqual(
+            self.convert(path, env=self.wait_env, options=self.options).stdout,
+            self.convert(path).stdout,
+        )
+
+
 @unittest.skipUnless(shutil.which("git"), "Git is required for textconv integration tests")
 class GitTextconvTests(unittest.TestCase):
     def setUp(self):
@@ -227,7 +336,7 @@ class GitTextconvTests(unittest.TestCase):
             env=self.env,
             capture_output=True,
             encoding="utf-8",
-            timeout=20,
+            timeout=120,
         )
         self.assertEqual(result.returncode, expected_returncode, result.stderr)
         return result.stdout
@@ -282,6 +391,31 @@ class GitTextconvTests(unittest.TestCase):
         staged_deleted = self.git("diff", "--cached", "--textconv", "--", path.name)
         self.assertIn('-A2\tformula: "=B1*2"', staged_deleted)
         self.assertNotIn("Binary files", untracked + added + deleted + staged_deleted)
+
+    def test_cached_textconv_gives_the_same_diff(self):
+        path = self.repo / "キャッシュ.xlsx"
+        save_book(path)
+        self.commit_book(path)
+        save_book(path, value="変更後")
+        expected = self.git("diff", "--textconv", "--", path.name)
+        self.env["EXCEL_TEXTCONV_TIMEOUT"] = "0"
+        cache = self.directory / "変換 キャッシュ"
+        command = self.git("config", "diff.excel.textconv").strip()
+        self.git("config", "diff.excel.textconv", command + " --cache-dir " + shlex.quote(str(cache)))
+        for _ in range(2):
+            self.assertEqual(self.git("diff", "--textconv", "--", path.name), expected)
+        self.assertEqual(len(list(cache.glob("*.txt"))), 2)
+
+        # Only the old side is converted; the new one is still queued.
+        save_book(path, value="未変換")
+        (cache / "worker.lock").touch()
+        self.env["EXCEL_TEXTCONV_TIMEOUT"] = "0.001"
+        changed = [
+            line for line in self.git("diff", "--textconv", "--", path.name).splitlines()
+            if line[:1] in "+-" and not line.startswith(("+++", "---"))
+        ]
+        self.assertTrue(changed[0].startswith("+# Excel を変換中です"), changed[:3])
+        self.assertIn('-A1\t"元の値"', changed)
 
     def test_formatting_only_change_has_no_cell_diff(self):
         path = self.repo / "formatting.xlsx"

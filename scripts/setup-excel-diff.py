@@ -5,6 +5,7 @@ import argparse
 import hashlib
 import os
 import shlex
+import shutil
 import subprocess
 import sys
 import venv
@@ -92,10 +93,34 @@ def converter_path(install_directory, source, requirements, versions):
     return install_directory / ("excel-textconv-" + digest.hexdigest()[:16] + ".py")
 
 
+def cache_directory(converter):
+    # One cache per converter build, so an update never reuses stale text.
+    return converter.parent / "cache" / converter.stem
+
+
 def textconv_command(python, converter):
     # Git for Windows also executes textconv with sh; use POSIX quoting and
     # forward slashes, keeping the venv Python path (not its symlink target).
-    return shlex.quote(python.as_posix()) + " " + shlex.quote(converter.as_posix())
+    parts = [python, converter, "--cache-dir", cache_directory(converter)]
+    return " ".join(shlex.quote(part if isinstance(part, str) else part.as_posix()) for part in parts)
+
+
+def registered_converter(command):
+    for part in shlex.split(command):
+        name = Path(part).name
+        if name.startswith("excel-textconv-") and name.endswith(".py"):
+            return Path(part)
+    return None
+
+
+def remove_stale_caches(converter):
+    cache_root = converter.parent / "cache"
+    if not cache_root.is_dir():
+        return
+    for directory in cache_root.iterdir():
+        if directory.name != converter.stem:
+            # A worker of the old build may still hold a file open on Windows.
+            shutil.rmtree(directory, ignore_errors=True)
 
 
 def verify(converter, source, attributes, expected):
@@ -127,10 +152,9 @@ def main():
         selected_directory = args.install_dir
         if args.check and selected_directory is None:
             commands = git_values("diff.excel.textconv")
-            if commands:
-                parts = shlex.split(commands[-1])
-                if len(parts) == 2 and Path(parts[1]).name.startswith("excel-textconv-"):
-                    selected_directory = Path(parts[1]).parent
+            registered = registered_converter(commands[-1]) if commands else None
+            if registered is not None:
+                selected_directory = registered.parent
         directory = (selected_directory or default_install_directory()).expanduser().resolve()
         if directory == root or root in directory.parents:
             raise RuntimeError("--install-dir は同期対象リポジトリの外を指定してください。")
@@ -156,7 +180,9 @@ def main():
         expected = {
             "diff.excel.textconv": textconv_command(python, converter),
             "diff.excel.binary": "true",
-            "diff.excel.cachetextconv": "true",
+            # The converter keeps its own cache. Git's cache would store the
+            # temporary "converting" text of a large workbook for good.
+            "diff.excel.cachetextconv": "false",
         }
         if not git_values("core.attributesFile", path=True):
             # Pin the selected path so the rules also apply when another shell
@@ -164,6 +190,7 @@ def main():
             expected["core.attributesFile"] = attributes.as_posix()
         if not args.check:
             converter.write_bytes(source)
+            remove_stale_caches(converter)
             if not existing_attributes.rstrip(b"\r\n").endswith(ATTRIBUTE_BLOCK.rstrip(b"\n")):
                 attributes.parent.mkdir(parents=True, exist_ok=True)
                 # Append bytes to preserve unrelated rules, encodings and line endings.

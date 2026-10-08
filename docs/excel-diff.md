@@ -30,8 +30,8 @@ Windows で Python が無い場合は `scoop install python` で導入できま�
 
 導入スクリプトは次を設定します。
 
-- リポジトリの外に専用の仮想環境を作り、[openpyxl / xlrd](../requirements-excel-diff.txt)と変換スクリプトを置く
-- グローバル Git 設定に `diff.excel.textconv`、`diff.excel.binary=true`、`diff.excel.cachetextconv=true` を登録する
+- リポジトリの外に専用の仮想環境を作り、[openpyxl / xlrd](../requirements-excel-diff.txt)と変換スクリプトを置く。変換結果のキャッシュも同じ場所の `cache` フォルダーに作る
+- グローバル Git 設定に `diff.excel.textconv`、`diff.excel.binary=true`、`diff.excel.cachetextconv=false` を登録する([大きいブックの表示](#大きいブックの表示)のため、Git の変換キャッシュは使わない)
 - 既存の `core.attributesFile`、未指定なら Git の既定のユーザー属性ファイルに Excel 用の `diff=excel` を追記する。既存の内容は保持し、同じ行を重複追加しない
 - グローバル `core.attributesFile` が未指定なら、選んだ属性ファイルの絶対パスを登録する。エディタとシェルで `XDG_CONFIG_HOME` が違う場合も同じ設定を使う。システム設定に既存の属性ファイルがある場合はそのパスを使い、書き込み権限が無ければエラーで止まる
 
@@ -60,6 +60,36 @@ Windows で Python が無い場合は `scoop install python` で導入できま�
 
 空のセルは省略します。文字列中の改行やタブは `\n` / `\t` として表示し、1 セルを 1 行で比較します。書式・色・図・マクロのコードは比較しません。`.xlsb` とパスワードで暗号化されたブックは対象外です。
 
+## 大きいブックの表示
+
+変換に時間がかかっても、lazygit の操作は止まりません。1 回の変換が 2 秒以内に終わらない場合、変換スクリプトはすぐに次のような仮の内容を返し、残りの変換を裏で続けます。
+
+```diff
++# Excel を変換中です (sha256 1a2b3c4d5e6f7a8b)
++# 大きいブックのため、変換を裏で続けています。完了後にファイルを選び直すか、lazygit の R で再読み込みすると表示されます。
+ Sheet: "売上"
+```
+
+lazygit はファイル一覧を 10 秒ごとに更新する(`refresher.refreshInterval` の既定値)ため、変換が終われば選んだままでもセルの差分に切り替わります。すぐ見たい場合は、ファイルを選び直すか `R` を押します。比較する 2 つの版のうち片方だけが変換済みの場合は、一時的にその版の全セルを削除(または追加)したように表示されます。先頭の「Excel を変換中です」の行で見分けてください。
+
+Windows の lazygit 0.66.0 は、別のファイルへ移っても実行中の差分コマンドを止められません。待ち時間を区切らないと、離れたブックの変換が裏で重なって CPU を使い続けるため、次のようにしています。
+
+- 裏の変換は 1 つずつ、低い優先度で実行する。最後に表示しようとしたブックから変換し、1 時間以上表示されなかった依頼は捨てる
+- 変換結果はブックの内容(SHA-256)ごとにキャッシュし、同じ内容は 2 回目から変換しない。キャッシュは合計 512 MB を超えた分と、30 日使わなかった分から消える。導入スクリプトを再実行すると、古い版の変換スクリプトのキャッシュも消す
+- Git の変換キャッシュ(`diff.excel.cachetextconv`)は仮の内容まで保存してしまうため使わない
+
+待つ時間は環境変数 `EXCEL_TEXTCONV_TIMEOUT`(秒)で変えられます。`0` にすると変換が終わるまで待ちます。コマンドラインの `git diff` で必ず全セルを表示する場合は次のように実行します。
+
+```sh
+EXCEL_TEXTCONV_TIMEOUT=0 git diff -- "売上表.xlsx"
+```
+
+```powershell
+$env:EXCEL_TEXTCONV_TIMEOUT = "0"; git diff -- "売上表.xlsx"
+```
+
+PowerShell の設定は、そのウィンドウで後から実行するコマンドにも効きます。元に戻すときは `Remove-Item Env:EXCEL_TEXTCONV_TIMEOUT` を実行します。
+
 ## 確認と操作
 
 Excel のある Git リポジトリで、実際のファイル名を指定します。
@@ -76,8 +106,16 @@ git diff --cached -- "売上表.xlsx"
 
 この差分は閲覧用です。lazygit の**ファイル一覧**で `Space` を押して Excel 全体をステージします。`Enter` で差分に入り、行・ハンクをステージしたり破棄したりしないでください。既存の Excel にはテキストのパッチを適用できず、新規ファイルでは変換後のテキストを Excel の代わりにステージしてしまう場合があります。`diff.excel.binary=true` はバイナリ扱いを維持しますが、lazygit のこれらの操作を禁止する設定ではありません。
 
-自動検証は、このリポジトリのフォルダーで導入した仮想環境の Python を使って実行できます(Linux の既定パスの例)。
+自動検証は、このリポジトリのフォルダーで導入した仮想環境の Python を使って実行できます(既定の置き場所の例)。
+
+Linux:
 
 ```sh
 "${XDG_DATA_HOME:-$HOME/.local/share}/lazygit-excel-diff/venv/bin/python" -B -m unittest discover -s tests -v
+```
+
+Windows(PowerShell):
+
+```powershell
+& "$env:LOCALAPPDATA\lazygit-excel-diff\venv\Scripts\python.exe" -B -m unittest discover -s tests -v
 ```
