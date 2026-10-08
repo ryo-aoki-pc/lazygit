@@ -31,6 +31,39 @@ mkdir -p ~/.config/lazygit
 ln -sf ~/lazygit-config/config.yml ~/.config/lazygit/config.yml
 ```
 
+このリポジトリを設定ディレクトリに直接クローンする場合(Windows の例。lazygit を終了してから Windows PowerShell に貼り付けます):
+
+```powershell
+$d = "$env:LOCALAPPDATA\lazygit"
+if (Test-Path -LiteralPath "$d.bak") {
+  Write-Warning "$d.bak がすでにあるため中止しました。中身を確かめて片付けてから、貼り直してください"
+} else {
+  if (Test-Path -LiteralPath $d) { Move-Item -LiteralPath $d -Destination "$d.bak" -ErrorAction Stop; "moved: $d -> $d.bak" }
+  git clone https://github.com/ryo-aoki-pc/lazygit.git $d
+  git -C $d branch --show-current
+  lazygit --print-config-dir
+}
+```
+
+- Windows ではシンボリックリンクの作成に開発者モードか管理者権限が必要なため、リンクではなく設定ディレクトリ `%LOCALAPPDATA%\lazygit` に直接クローンします
+- 既存の `%LOCALAPPDATA%\lazygit`(以前の設定と状態ファイル)は `lazygit.bak` に退避します。`lazygit.bak` がすでにある場合は、退避もクローンもせずに警告を出して止まります
+- `custom`(既定のブランチ)と `C:\Users\<ユーザー名>\AppData\Local\lazygit` が表示されれば完了です
+- Windows の lazygit は状態ファイル(`state.yml` など)も同じフォルダーに作りますが、[`.gitignore`](.gitignore) で `state.yml`・`github_pull_requests.json`・`development.log` を除外しているため、`git status` には出ません
+- Windows の実機ではまだ実行していません。確認した範囲は[検証記録](docs/verification/readme.md#editinterminal-と-windows-向け手順の確認2026-10-08)に記載しています
+- 元に戻す場合は、lazygit を終了し、次の 1 つ目のブロックで何も表示されない(未コミット・未 push の変更が無い)ことを確かめてから、2 つ目のブロックを貼り付けます
+
+```powershell
+$d = "$env:LOCALAPPDATA\lazygit"
+git -C $d status --short
+git -C $d log --oneline '@{u}..'
+```
+
+```powershell
+$d = "$env:LOCALAPPDATA\lazygit"
+Remove-Item -LiteralPath $d -Recurse -Force
+if (Test-Path -LiteralPath "$d.bak") { Move-Item -LiteralPath "$d.bak" -Destination $d }
+```
+
 ファイルを置かずに一時的に試す場合:
 
 ```sh
@@ -43,7 +76,7 @@ lazygit --use-config-file ~/lazygit-config/config.yml
 
 ### 設定手順
 
-1. `delta --version` で導入を確認します。Homebrew を使う場合は `brew install git-delta` で導入できます。
+1. `delta --version` で導入を確認します。Homebrew を使う場合は `brew install git-delta`、Windows の scoop では `scoop install delta` で導入できます(Windows は[Windows で使う場合](#windows-で使う場合)も参照)。
 2. `lazygit --print-config-dir` で設定ディレクトリを確認し、その中の `config.yml` を開きます。既存の `git.diffRenderers` を下の3項目に置き換えます。`git:` がすでにある場合は、その中に設定してください。
 3. 保存後に lazygit を終了して再起動します。
 
@@ -69,6 +102,38 @@ git:
 共通の `--no-gitconfig` は Git 側の delta 設定を読み込まず、この設定例の表示を使います。`--paging=never` は外部ページャを起動せず、`--tabs=4` は lazygit のタブ幅に揃えます。ダーク背景向けのため、ライト背景の端末では両方の `--dark` を `--light` にし、見やすさ優先の構文テーマを `--syntax-theme=GitHub` に変更してください。
 
 左右比較では変更前が左、変更後が右に並びます。表示幅が足りない場合は、`0` キーで差分ビューにフォーカスし、`+` キーで拡大してください。ファイル一覧やコミットの差分閲覧で有効です。lazygit 0.66.0 では、Enter で差分ビューに入り、delta 0.20.1 の表示を保ったまま行・ハンクを選択できます。lazygit 0.65.1 では、Enter で入るステージング画面は内蔵表示になります。
+
+### Windows で使う場合
+
+Windows の lazygit は、描画のコマンドを `cmd /s /c "<コマンド>"`(cmd.exe)で実行します。cmd.exe も delta.exe の引数の解釈も単一引用符 `'…'` を引用符として扱わないため、`'` が値に残ったり、空白で引数が分かれたりします。上の設定例は、単一引用符を二重引用符に置き換えた次の形で使ってください。
+
+```yaml
+git:
+  diffRenderers:
+    - command: >-
+        delta --no-gitconfig --dark --paging=never --syntax-theme=none --tabs=4 --side-by-side
+        --raw --inspect-raw-lines=false --word-diff-regex="(?s).+" --max-line-distance=1
+        --line-numbers-left-format="" --line-numbers-right-format="│ " --wrap-max-lines=0
+      colorArg: never
+      name: delta side-by-side fast
+    - command: >-
+        delta --no-gitconfig --dark --paging=never --tabs=4 --side-by-side --line-numbers
+        --syntax-theme="Monokai Extended" --wrap-max-lines=unlimited
+      name: delta side-by-side readable
+    - type: rawGit
+      name: default
+```
+
+二重引用符の形は、Linux でも単一引用符の形と同じ表示になります。このリポジトリの `config.yml` の delta の行は引用符を使っていないため、Windows でも書き換えは不要です。
+
+Windows の `delta.exe` は Visual C++ ランタイム(`VCRUNTIME140.dll`)を必要とします。scoop の `delta` はランタイムを含まないため、PowerShell で `Test-Path "$env:WINDIR\System32\vcruntime140.dll"` が `False` の場合は、先に [Visual C++ 再頒布可能パッケージ](https://learn.microsoft.com/ja-jp/cpp/windows/latest-supported-vc-redist)の X64 版を入れてから(インストールには管理者の承認が要ります。winget では `winget install --exact --id Microsoft.VCRedist.2015+.x64`)、delta を入れてください。
+
+```powershell
+scoop install delta
+delta --version
+```
+
+Windows の実機での動作は未検証です。確認した範囲は[検証記録](docs/verification/readme.md#editinterminal-と-windows-向け手順の確認2026-10-08)に記載しています。
 
 ### 速度を最優先にする設定
 
