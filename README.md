@@ -177,6 +177,26 @@ Windows 11 の実機で、scoop の delta 0.20.1 と、同梱の `config.yml`・
 
 設定形式と切替操作は [lazygit の公式資料](https://github.com/jesseduffield/lazygit/blob/v0.66.0/docs/Custom_DiffRenderers.md)、左右比較は [delta の公式資料](https://dandavison.github.io/delta/side-by-side-view.html)、各オプションは [delta の公式ヘルプ](https://dandavison.github.io/delta/full---help-output.html)を参照してください。動作確認の環境と内容は[検証記録](docs/verification/readme.md#delta-の表示と性能の検証)に記載しています。
 
+## Excel の差分表示
+
+Git の `textconv` で Excel をシート名・セル番地・値・数式のテキストに変換し、同じ delta の左右比較で表示できます。`config.yml` の変更は不要です。Python 3.9 以降を用意し、このリポジトリのフォルダーで次を実行します。
+
+Linux / macOS:
+
+```sh
+python3 scripts/setup-excel-diff.py
+```
+
+Windows(PowerShell。scoop の Python なら `scoop install python` で導入):
+
+```powershell
+python scripts/setup-excel-diff.py
+```
+
+設定はその端末の Git 全体に適用されます。Python の依存ライブラリは設定リポジトリの外に専用の仮想環境を作って導入し、既存の属性設定を残して Excel 用の行を追加します。Syncthing で設定リポジトリを同期している場合も、導入は各端末で一度ずつ実行してください。
+
+対応形式、表示例、確認方法は [Excel 差分の手順](docs/excel-diff.md)を参照してください。Excel はファイル全体をステージし、セル単位のステージは行わないでください。
+
 ## 必要になったら検討する項目
 
 `config.yml` には書いていません(デフォルトのまま)。使うときは `config.yml` 内の該当キーの値を書き換えてください。

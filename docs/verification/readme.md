@@ -4,6 +4,18 @@
 
 lazygit 0.66.0 の公式 JSON スキーマ([schema/config.json](https://github.com/jesseduffield/lazygit/blob/v0.66.0/schema/config.json))と、新規 AlmaLinux 10.2 VM の実 TUI で検証済みです。2026-10-08 には Ubuntu 24.04 のコンテナで、`os.editInTerminal` と Windows 向け手順のうち Linux で確かめられる範囲を確認しました(Windows の実機では未実行)。同じ日に、Windows 11 と Raspberry Pi 5(AlmaLinux 10.2)の実機でも、0.66.0 の既定値に追従した設定を確認しました。
 
+## Excel の textconv 差分表示（2026-10-08）
+
+[導入手順](../excel-diff.md)に対応する追加の検証。Debian 13.6 のコンテナで、Git 2.52.0、Python 3.12.14、openpyxl 3.1.5、xlrd 2.0.1 / 2.0.2、lazygit 0.66.0、delta 0.20.1 を使った。lazygit / delta の検証用バイナリは公式リリースのチェックサムと一致した。今回の Excel 機能は Windows / macOS の実機では未検証。
+
+- [`tests/test_excel_textconv.py`](../../tests/test_excel_textconv.py) の 10 テストが成功。複数シート、日本語・空白を含むパス、拡張子の無い Git 一時ファイル、数式、日付・時刻・真偽値・エラー、セル内改行・タブ、書式だけの変更、不正なシート dimension と破損ファイルを確認した。実際の Git リポジトリで staged / unstaged / 追加 / 削除 / 未追跡の差分も確認した
+- lazygit の実 TUI を PTY と pyte で読み取り、同梱 `config.yml` の delta と `|` で切り替える内蔵表示の両方で、変更・ステージ済み・追加・削除・未追跡・コミットの Excel 差分が出ることを確認した。`.xls` も複数シートのセル値を表示した
+- ファイル一覧の `Space` でステージした `.xlsx` / `.xls` は、インデックスの内容が元の ZIP / OLE ファイルとバイト単位で一致した
+- `Enter` で差分に入って部分ステージすると、既存の Excel ではパッチ適用エラーになった。未追跡の Excel では変換後のテキストをインデックスに入れてしまった。`diff.excel.binary=true` でも操作は禁止されないため、手順ではファイル全体のステージだけを案内している
+- 導入スクリプトは隔離した Git 設定と、日本語・空白・単一引用符を含む保存先で実行した。既存の CRLF の属性行を保持し、6 形式の大小文字混在の拡張子が `diff=excel` になることを確認した。再実行と `--check` の前後で設定内容が変わらず、空・相対パス・複数の `core.attributesFile` は設定を書き換えずに止まった
+- 変換処理・ライブラリの更新で設置先ファイル名が変わり、Git の変換キャッシュが更新されることを確認した。Windows 向けのパス引用符はコードとして確認したが、Git for Windows での実行は未検証
+- システム設定にだけ既存の属性パスがある場合もその内容を保持した。別の `XDG_CONFIG_HOME` / `XDG_DATA_HOME` で起動しても登録済みのパスを使い、`--check` が設定を変更せず成功した。作業環境の通常の Git 設定にも導入し、新規の検証リポジトリで `.XLSX` のセル変更が delta に渡ることを確認した
+
 ## Windows と Raspberry Pi の実機での検証（2026-10-08）
 
 Windows 11 の PC と、Raspberry Pi 5 の AlmaLinux 10.2 の 2 台(kawasaki-pi・abiko-pi)で、実際に使っている lazygit を起動して確かめた。3 台の設定フォルダーは同じ clone を Syncthing で同期しており、確認の前に `e6081c2` へ更新した。
