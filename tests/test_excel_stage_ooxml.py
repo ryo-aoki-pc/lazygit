@@ -323,6 +323,28 @@ class OoxmlStagingTests(unittest.TestCase):
         self.assertEqual(book["売上"]["Z99"].value, dt.datetime(2027, 1, 2))
         book.close()
 
+    def test_many_selected_cells_across_existing_and_new_rows_keep_xml_order(self):
+        def change(book):
+            sheet = book["売上"]
+            for row in range(1, 301):
+                sheet.cell(row, 4, row * 3)
+            sheet["C5"] = "新しい行の中央"
+            sheet["A5"] = "新しい行の先頭"
+
+        base = OOXML.Workbook(book_bytes())
+        source = OOXML.Workbook(edit_book(base.data, change))
+        selected = {("1", "D" + str(row)) for row in range(1, 301)} | {("1", "C5"), ("1", "A5")}
+        result = base.rebuild(source, selected)
+        actual = OOXML.Workbook(result)
+        for row in range(1, 301):
+            self.assertEqual(actual.cells[("1", "D" + str(row))], OOXML.Cell("number", str(row * 3)))
+        self.assertEqual(actual.cells[("1", "C1")], OOXML.Cell("string", "残す"))
+        root = etree.fromstring(package(result)["xl/worksheets/sheet1.xml"])
+        rows = root.find("{" + NS + "}sheetData").findall("{" + NS + "}row")
+        self.assertEqual([int(row.get("r")) for row in rows], list(range(1, 301)))
+        fifth = [cell.get("r") for cell in rows[4].findall("{" + NS + "}c")]
+        self.assertEqual(fifth, ["A5", "C5", "D5"])
+
 
 if __name__ == "__main__":
     unittest.main()

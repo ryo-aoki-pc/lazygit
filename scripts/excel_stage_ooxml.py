@@ -105,11 +105,15 @@ def parse_record(line):
 
 
 def _local(node):
-    return etree.QName(node).localname if isinstance(node.tag, str) else ""
+    # Read Clark-notation tags ("{namespace}name") directly; creating a QName
+    # for every node dominated the time spent on large worksheets.
+    tag = node.tag
+    return tag.rpartition("}")[2] if isinstance(tag, str) else ""
 
 
 def _namespace(node):
-    return etree.QName(node).namespace or ""
+    tag = node.tag
+    return tag[1:tag.index("}")] if isinstance(tag, str) and tag.startswith("{") else ""
 
 
 def _tag(namespace, name):
@@ -418,8 +422,11 @@ class Workbook:
             tree = copy.deepcopy(self._trees[sheet.path])
             root = tree.getroot()
             data = _child(root, "sheetData")
+            # Index rows once; scanning sheetData per selected cell was
+            # quadratic for large sheets with many selected cells.
+            rows = {node.get("r"): node for node in _children(data, "row")}
             for coordinate in sorted(coordinates, key=coordinate_key):
-                self._replace(data, coordinate, source.cells.get((sheet.id, coordinate)))
+                self._replace(data, rows, coordinate, source.cells.get((sheet.id, coordinate)))
             dimension = _child(root, "dimension")
             if dimension is not None:
                 first, last = _range(dimension.get("ref", "A1"))
@@ -458,15 +465,15 @@ class Workbook:
             letters = chr(65 + remainder) + letters
         return letters + str(row)
 
-    def _replace(self, data, coordinate, cell):
+    def _replace(self, data, rows, coordinate, cell):
         row_number, column_number = coordinate_key(coordinate)
-        rows = _children(data, "row")
-        row = next((node for node in rows if node.get("r") == str(row_number)), None)
+        row = rows.get(str(row_number))
         if row is None:
             if cell is None:
                 return
             row = etree.Element(_tag(self._ns, "row"), r=str(row_number))
-            following = next((node for node in rows if int(node.get("r", "0")) > row_number), None)
+            following = next((node for node in _children(data, "row") if int(node.get("r", "0")) > row_number), None)
+            rows[str(row_number)] = row
             if following is None:
                 data.append(row)
             else:
