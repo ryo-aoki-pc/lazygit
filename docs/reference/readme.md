@@ -1,6 +1,6 @@
 # lazygit 設定リファレンス
 
-[導入・更新手順](../../README.md) / [検証記録](../verification/readme.md)
+[文書一覧](../README.md) / [設定の導入](../setup.md) / [設定の保守](../maintenance.md) / [検証記録](../verification/readme.md)
 
 `main` ブランチ(lazygit 公式のデフォルト設定)の `config.yml` を丸ごとベースにし、変更した項目にだけ日本語のコメントを付けてあります。
 
@@ -8,7 +8,7 @@
 
 ### 画面・操作
 
-- **[delta による左右比較の差分表示](../../README.md#delta-の設定と表示)** — 構文ハイライトを無効にして負荷を抑え、`|` キーで内蔵表示へ切替可能
+- **[delta による左右比較の差分表示](../diff-renderers.md)** — 構文ハイライトを無効にして負荷を抑え、`|` キーで内蔵表示へ切替可能
 - **[Excel の差分表示](../excel-diff.md)** — Git の `textconv` にシート名・セル番地・値・数式を渡す変換処理を登録し、既存の delta で比較する。端末ごとに追加の導入が必要
 - **あいまい検索** — `/` での絞り込みが fuzzy match になり、少ないタイプ数で目的の項目に届く
 - **Nerd Fonts アイコン** — ファイル種別などをアイコンで表示
@@ -25,9 +25,13 @@
 - 全設定項目のリファレンスは公式ドキュメントを参照してください:
   - [Config.md](https://github.com/jesseduffield/lazygit/blob/master/docs/Config.md)(全設定項目)
 
-## ブランチ構成
+## 必要になったら検討する項目
 
-| ブランチ | 内容 |
-| --- | --- |
-| `custom`(デフォルト) | このブランチ。`main` の上に自分用のカスタマイズを積んだもの |
-| `main` | lazygit 公式のデフォルト設定([docs/Config.md](https://github.com/jesseduffield/lazygit/blob/master/docs/Config.md) の Default セクション)をそのまま置いた upstream 追従ブランチ。直接編集しない |
+`config.yml` には書いていません(デフォルトのまま)。使うときは `config.yml` 内の該当キーの値を書き換えてください。
+
+- `os.editPreset` — `e` キーで開くエディタの指定(未指定なら `$EDITOR` 等から自動判定)
+- `os.copyToClipboardCmd` — SSH 先や tmux 内でも OSC52 でローカルのクリップボードへコピー
+- `git.commitPrefix` — ブランチ名(例: `feature/JIRA-123`)からコミットメッセージの接頭辞を自動入力
+- `git.mainBranches` / `git.autoForwardBranches` — develop 運用や全ブランチ自動 fast-forward
+- `gui.statusPanelView` — ステータスパネルに全ブランチのログを表示
+- `gui.theme.authorColors` / `gui.sidePanelWidth` / `keybinding` — 見た目・操作の微調整

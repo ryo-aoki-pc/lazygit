@@ -1,12 +1,12 @@
 # Excel の差分表示
 
-[README](../README.md#excel-の差分表示) / [検証記録](verification/readme.md)
+[文書一覧](README.md) / [設定の導入](setup.md) / [delta の設定と表示](diff-renderers.md) / [検証記録](verification/readme.md)
 
 Excel はそのままではバイナリ差分になります。[変換スクリプト](../scripts/excel-textconv.py)を Git の `diff.excel.textconv` に登録すると、Git が変更前後の Excel をテキスト化して差分を生成し、lazygit の既存の delta が左右比較で表示します。delta の `--no-gitconfig` は delta 自身の表示設定だけに作用するため、この Git の変換設定は有効です。
 
 ## 導入
 
-Python 3.9 以降と Git が必要です。変換キャッシュの保存には、Git のコミット時と同じ `user.name` / `user.email` の設定を使います。lazygit と delta は [README](../README.md#delta-の設定と表示)の手順で導入してください。
+Python 3.9 以降と Git が必要です。変換キャッシュの保存には、Git のコミット時と同じ `user.name` / `user.email` の設定を使います。lazygit 本体は [setup-notes の導入手順](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/lazygit.md)、個人設定は [設定の導入](setup.md)、delta は [delta の設定と表示](diff-renderers.md#設定手順)を参照してください。`config.yml` の変更は不要です。
 
 このリポジトリのフォルダーで実行します。
 

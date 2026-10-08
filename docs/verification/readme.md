@@ -1,6 +1,6 @@
 # lazygit 検証記録
 
-[導入・更新手順](../../README.md)
+[文書一覧](../README.md) / [設定の導入](../setup.md) / [設定の保守](../maintenance.md)
 
 lazygit 0.66.0 の公式 JSON スキーマ([schema/config.json](https://github.com/jesseduffield/lazygit/blob/v0.66.0/schema/config.json))と、新規 AlmaLinux 10.2 VM の実 TUI で検証済みです。2026-10-08 には Ubuntu 24.04 のコンテナで、`os.editInTerminal` と Windows 向け手順のうち Linux で確かめられる範囲を確認しました(Windows の実機では未実行)。同じ日に、Windows 11 と Raspberry Pi 5(AlmaLinux 10.2)の実機でも、0.66.0 の既定値に追従した設定を確認しました。
 
@@ -180,7 +180,7 @@ snacks.nvim の lazygit と同じく、`LG_CONFIG_FILE` の最後に `os.editPre
 
 ### delta の設定例の引用符
 
-- [README の設定例](../../README.md#設定手順)の 2 つのコマンドを、単一引用符の形と二重引用符の形で、Linux の lazygit と同じ `/bin/bash -c` に通して比べた(`git -c color.diff=always diff | /bin/bash -c '<コマンド>'`)。速度優先・見やすさ優先とも、出力はバイト単位で一致した
+- [README の設定例](../diff-renderers.md#設定手順)の 2 つのコマンドを、単一引用符の形と二重引用符の形で、Linux の lazygit と同じ `/bin/bash -c` に通して比べた(`git -c color.diff=always diff | /bin/bash -c '<コマンド>'`)。速度優先・見やすさ優先とも、出力はバイト単位で一致した
 - 二重引用符の形を設定ファイルに書いて lazygit を起動した。コマンドログに `/bin/bash -c "delta … --word-diff-regex="(?s).+" … --line-numbers-right-format="│ " --wrap-max-lines=0"` と出て、`|` で速度優先 → 見やすさ優先 → 内蔵表示 → 速度優先と切り替わり、エラーは出なかった
 - Windows で `cmd /s /c "<コマンド>"` で実行することは、lazygit 0.66.0 の [cmd_obj_builder.go](https://github.com/jesseduffield/lazygit/blob/v0.66.0/pkg/commands/oscommands/cmd_obj_builder.go)(`newWindowsShell`)と [os_windows.go](https://github.com/jesseduffield/lazygit/blob/v0.66.0/pkg/commands/oscommands/os_windows.go) を読んだもの
 
@@ -213,7 +213,7 @@ snacks.nvim の lazygit と同じく、`LG_CONFIG_FILE` の最後に `os.editPre
 
 ## 新規 AlmaLinux VM での検証（2026-10-06）
 
-- AlmaLinux 10.2 Workstation の x86_64 新規 VM へ Homebrew 7.0.8 / lazygit 0.66.0 を入れ、[導入手順](../../README.md#導入方法)の公開 URL から `dc3873e` を clone して `~/.config/lazygit/config.yml` のリンクを作った。SSH の対話 PTY で試験用 git リポジトリを開き、変更行数・ファイルツリー・差分の表示と `q` の終了を確認した
+- AlmaLinux 10.2 Workstation の x86_64 新規 VM へ Homebrew 7.0.8 / lazygit 0.66.0 を入れ、[導入手順](../setup.md#導入方法)の公開 URL から `dc3873e` を clone して `~/.config/lazygit/config.yml` のリンクを作った。SSH の対話 PTY で試験用 git リポジトリを開き、変更行数・ファイルツリー・差分の表示と `q` の終了を確認した
 - 初回起動は 4 キーを自動移行し、リンク先の `config.yml` を書き換えた。新規 clone に不要な変更が残らないよう、設定の値とコメントを保持して次の互換修正を適用した
   - `gui.wrapLinesInStagingView` → `gui.wrapLinesInDiffView`
   - `gui.useHunkModeInStagingView` → `gui.useHunkModeInDiffView`
@@ -223,7 +223,7 @@ snacks.nvim の lazygit と同じく、`LG_CONFIG_FILE` の最後に `os.editPre
 
 ## delta の表示と性能の検証
 
-[設定手順と表示の比較](../../README.md#delta-の設定と表示)は lazygit 0.65.1 / delta 0.20.1 で確認した。README の設定例は YAML とコマンドの引用符を検証し、実際の lazygit の対話 PTY で速度優先 → 見やすさ優先 → 内蔵表示 → 速度優先の切り替えを確認した。
+[設定手順と表示の比較](../diff-renderers.md)は lazygit 0.65.1 / delta 0.20.1 で確認した。README の設定例は YAML とコマンドの引用符を検証し、実際の lazygit の対話 PTY で速度優先 → 見やすさ優先 → 内蔵表示 → 速度優先の切り替えを確認した。
 
 lazygit 0.66.0 の Enter 操作は[公式の差分ビューの実装](https://github.com/jesseduffield/lazygit/blob/v0.66.0/pkg/gui/controllers/switch_to_focused_main_view_controller.go#L91)と[内蔵表示への切り替え条件](https://github.com/jesseduffield/lazygit/blob/v0.66.0/pkg/gui/controllers/helpers/diff_line_raw_fallback.go#L29)で確認した。delta 0.20.1 は行選択に必要なメタデータに対応し、同梱設定・速度優先・見やすさ優先の各コマンドがメタデータを返すことも確認した。0.66.0 の Enter 操作自体は実 TUI では試験していない。
 
