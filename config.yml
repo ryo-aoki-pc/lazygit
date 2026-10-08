@@ -568,7 +568,8 @@ os:
   editAtLineAndWait: ""
 
   # Whether lazygit suspends until an edit process returns
-  editInTerminal: false
+  # e のエディタの終了まで lazygit を止めて Vim / Neovim に端末を渡す(false を明示するとプリセットの判定より優先され、端末を渡さない)
+  editInTerminal: true
 
   # For opening a directory in an editor
   openDirInEditor: ""

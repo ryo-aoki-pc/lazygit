@@ -16,6 +16,7 @@
 - **快適なスクロールとタブ切替** — スクロール量を増加、パネル番号キー(1〜5)の再押下でタブ切替
 - **フォーカスパネルの自動拡大**、絵文字コード(`:sparkles:` 等)の表示
 - **マウス操作の無効化** — ターミナル側のテキスト選択・コピーをそのまま使える
+- **`e` キーで Vim / Neovim を端末内で開く** — `os.editInTerminal` を `true` にし、エディタの終了まで lazygit を一時停止する。公式デフォルト一覧の `false` を明示すると、エディタのプリセット(`vim` / `nvim` など)の判定より優先されて端末を渡さず、`e` でエディタが表示されないまま lazygit が止まる([検証記録](../verification/readme.md#editinterminal-と-windows-向け手順の確認2026-10-08))。Neovim の中から `nvim-remote` のプリセットで開いた lazygit(snacks.nvim の lazygit。LazyVim の `<leader>gg` など)では、`e` の後も lazygit が閉じずに残る(snacks.nvim と同じ設定の重ね方で確認。閉じる動きに戻すには、snacks.nvim の lazygit の設定で `os.editInTerminal` を `false` にする)
 - **外部エディタから戻るときの Enter 不要**、起動時ポップアップもオフ
 
 ## 補足
