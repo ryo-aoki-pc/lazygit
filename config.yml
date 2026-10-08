@@ -644,7 +644,13 @@ disableStartupPopups: true
 
 # User-configured commands that can be invoked from within Lazygit
 # See https://github.com/jesseduffield/lazygit/blob/master/docs/Custom_Command_Keybindings.md
-customCommands: []
+# Excel の変更を専用画面で選択し、元の Excel 形式のまま部分ステージ
+customCommands:
+  - key: E
+    context: files
+    description: Excel のハンクを選択してステージ
+    command: 'git excel-stage -- {{.SelectedFile.Name | quote}}'
+    output: terminal
 
 # See https://github.com/jesseduffield/lazygit/blob/master/docs/Config.md#custom-pull-request-urls
 services: {}
