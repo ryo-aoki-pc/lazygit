@@ -4,6 +4,20 @@
 
 lazygit 0.66.0 の公式 JSON スキーマ([schema/config.json](https://github.com/jesseduffield/lazygit/blob/v0.66.0/schema/config.json))と、新規 AlmaLinux 10.2 VM の実 TUI で検証済みです。2026-10-08 には Ubuntu 24.04 のコンテナで、`os.editInTerminal` と Windows 向け手順のうち Linux で確かめられる範囲を確認しました(Windows の実機では未実行)。同じ日に、Windows 11 と Raspberry Pi 5(AlmaLinux 10.2)の実機でも、0.66.0 の既定値に追従した設定を確認しました。
 
+## Excel の部分ステージ（2026-10-08）
+
+[専用画面の操作](../excel-diff.md#excel-の部分ステージ)と Excel の再構成処理を AlmaLinux 10.2 (aarch64) で確認した。Git 2.52.0、Python 3.14.8、lazygit 0.66.0、delta 0.20.1、openpyxl 3.1.5、xlrd 2.0.2、lxml 6.1.3 を使った。
+
+- 導入した仮想環境で `python -B -m unittest discover -s tests -v` を実行し、56 テストが成功した。既存の textconv 16 件に、Git 連携 23 件、OOXML 編集 10 件、セットアップ 7 件を追加した
+- Git 連携では既存ステージと未選択セルの保持、別ファイルの並行ステージ、対象 Excel の並行変更拒否、別インデックスと linked worktree、特殊なファイル名、Git alias のサブディレクトリ実行、不完全なセル置換とキャンセルを確認した
+- OOXML の検証では型付きセル、共有文字列、書式、行属性、名前空間、未編集パーツの内容、数式キャッシュと calcChain、外部参照の変更拒否を確認した。VBA と画像等の保持は不透明な ZIP パーツのバイト一致で確認し、Excel 本体でマクロや画像を開く試験は行っていない
+- 160 列 × 45 行の PTY で同梱設定の lazygit を起動し、`E` → `Enter` → `Space` → `X` → `q` を操作した。日本語名のブックとシートで、A2 と A30 の別ハンクのうち A2 だけがステージされ、A30 と作業ファイルの全バイトが元のままだった。フォーカスした選択画面も delta の左右比較を維持した
+- 同じ実 TUI で、ハンクを選択してから `X` を押さずに `q` で戻った場合、元の Excel のインデックス内容と作業ファイルは変わらなかった
+- 初回の実 TUI では日本語シート名のハンク選択が無言で反映されなかった。delta の OSC1717 のファイル名が八進エスケープされたままで、lazygit の実ファイル名と一致しなかった。一時リポジトリだけ `core.quotePath=false` にして解消し、日本語と空白を含むシート名の回帰テストを追加した
+- 通常の導入先にもセットアップを実行し、読み取り専用の `--check` が成功した。セットアップの再実行、既存 attributes の保持、設置スクリプトと alias の検証は隔離したテストでも確認した
+
+今回の部分ステージ処理は Windows / macOS の実機では未検証。新規ファイル、旧形式、シート構成変更、共有・配列数式などの制限は[操作手順](../excel-diff.md#excel-の部分ステージ)に記載した。
+
 ## Windows 11 での Excel 差分の検証と大きいブックへの対応（2026-10-08）
 
 [Excel の textconv 差分表示](#excel-の-textconv-差分表示2026-10-08)を Windows 11 の実機で確かめ、見つかった待ち時間の問題に対応した([大きいブックの表示](../excel-diff.md#大きいブックの表示))。
