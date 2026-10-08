@@ -273,7 +273,8 @@ class ExcelStageTests(unittest.TestCase):
             session, state = self.prepare()
             self.assertEqual(Path(state["index"]), alternate)
             self.select(session, state, {("売上", "A1")})
-            (self.repo / "notes.txt").write_text("other alternate stage\n", encoding="utf-8")
+            # Bytes keep LF on Windows, where write_text would store CRLF.
+            (self.repo / "notes.txt").write_bytes(b"other alternate stage\n")
             self.git("add", "--", "notes.txt")
             self.assertEqual(self.stage.apply_session(session), 1)
             self.assertEqual(self.staged_values()["売上"]["A1"].value, "別インデックスの選択")
@@ -281,7 +282,11 @@ class ExcelStageTests(unittest.TestCase):
         self.assertEqual(self.index_bytes(), standard_index)
 
     def test_filename_leading_dash_and_pathspec_characters_are_literal(self):
-        for number, filename in enumerate(("-日本語 表.xlsx", "literal[1]*?.xlsx", ":(glob)book.xlsx")):
+        filenames = ("-日本語 表.xlsx", "literal[1]*?.xlsx", ":(glob)book.xlsx")
+        if os.name == "nt":
+            # Windows filenames cannot contain *, ? or :; brackets are still a glob.
+            filenames = ("-日本語 表.xlsx", "literal[1].xlsx")
+        for number, filename in enumerate(filenames):
             with self.subTest(filename=filename):
                 path = self.repo / filename
                 save_book(path)
