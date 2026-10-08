@@ -253,7 +253,7 @@ class CacheTests(ConverterTestCase):
         result = self.convert(path, env=self.slow_env, options=self.options)
         self.assertLess(time.monotonic() - started, 15)
         self.assertEqual(
-            result.stdout.splitlines()[0], "# Excel を変換中です (sha256 " + key[:16] + ")"
+            result.stdout.splitlines()[0], "# Excel を裏で変換中 (" + key[:12] + ")"
         )
         # The command returned while the detached worker was still converting.
         cached = self.cache / (key + ".txt")
@@ -270,7 +270,7 @@ class CacheTests(ConverterTestCase):
         save_book(path)
         self.hold_worker_lock()
         first = self.convert(path, env=self.slow_env, options=self.options).stdout
-        self.assertTrue(first.startswith("# Excel を変換中です"))
+        self.assertTrue(first.startswith("# Excel を裏で変換中"))
         self.assertTrue(first.endswith('Sheet: "売上"\nSheet: "備考"\n'))
         self.assertTrue((self.cache / (self.key(path) + ".in")).exists())
         self.assertEqual(self.convert(path, env=self.slow_env, options=self.options).stdout, first)
@@ -284,7 +284,7 @@ class CacheTests(ConverterTestCase):
         self.hold_worker_lock()
         self.assertTrue(
             self.convert(path, env=self.slow_env, options=self.options).stdout.startswith(
-                "# Excel を変換中です"
+                "# Excel を裏で変換中"
             )
         )
         self.run_worker()
@@ -414,7 +414,7 @@ class GitTextconvTests(unittest.TestCase):
             line for line in self.git("diff", "--textconv", "--", path.name).splitlines()
             if line[:1] in "+-" and not line.startswith(("+++", "---"))
         ]
-        self.assertTrue(changed[0].startswith("+# Excel を変換中です"), changed[:3])
+        self.assertTrue(changed[0].startswith("+# Excel を裏で変換中"), changed[:3])
         self.assertIn('-A1\t"元の値"', changed)
 
     def test_formatting_only_change_has_no_cell_diff(self):

@@ -246,10 +246,10 @@ def sheet_titles(data):
 def placeholder(key, data):
     # The hash differs between the two sides of a diff, so Git still reports
     # the file as changed while the cells are being converted.
+    # Short lines, so they fit one half of delta's side-by-side view.
     lines = [
-        "# Excel を変換中です (sha256 " + key[:16] + ")",
-        "# 大きいブックのため、変換を裏で続けています。"
-        "完了後にファイルを選び直すか、lazygit の R で再読み込みすると表示されます。",
+        "# Excel を裏で変換中 (" + key[:12] + ")",
+        "# 完了後に選び直すか R で表示",
     ]
     # The converted text starts with the same sheet line. When the other side
     # is already converted, this keeps the note at the top of the diff instead
