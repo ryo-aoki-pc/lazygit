@@ -2,7 +2,86 @@
 
 [導入・更新手順](../../README.md)
 
-lazygit 0.66.0 の公式 JSON スキーマ([schema/config.json](https://github.com/jesseduffield/lazygit/blob/v0.66.0/schema/config.json))と、新規 AlmaLinux 10.2 VM の実 TUI で検証済みです。2026-10-08 には Ubuntu 24.04 のコンテナで、`os.editInTerminal` と Windows 向け手順のうち Linux で確かめられる範囲を確認しました(Windows の実機では未実行)。
+lazygit 0.66.0 の公式 JSON スキーマ([schema/config.json](https://github.com/jesseduffield/lazygit/blob/v0.66.0/schema/config.json))と、新規 AlmaLinux 10.2 VM の実 TUI で検証済みです。2026-10-08 には Ubuntu 24.04 のコンテナで、`os.editInTerminal` と Windows 向け手順のうち Linux で確かめられる範囲を確認しました(Windows の実機では未実行)。同じ日に、Windows 11 と Raspberry Pi 5(AlmaLinux 10.2)の実機でも、0.66.0 の既定値に追従した設定を確認しました。
+
+## Windows と Raspberry Pi の実機での検証（2026-10-08）
+
+Windows 11 の PC と、Raspberry Pi 5 の AlmaLinux 10.2 の 2 台(kawasaki-pi・abiko-pi)で、実際に使っている lazygit を起動して確かめた。3 台の設定フォルダーは同じ clone を Syncthing で同期しており、確認の前に `e6081c2` へ更新した。
+
+- 確認後の版: lazygit 0.66.0(Windows は scoop、Pi は Homebrew)、delta 0.20.1(Windows は scoop、Pi は Homebrew)、Git 2.55.0.windows.5(Windows)/ 2.52.0(Pi)
+- 確認前の版: Windows は lazygit 0.65.1・delta なし、kawasaki-pi は 0.65.1・delta 0.20.1、abiko-pi は 0.66.0・delta なし
+- 方法: 疑似端末(Windows は ConPTY、Linux は pty)の 120列×40行で lazygit を起動し、画面を pyte で読み取った。`CONFIG_DIR` を一時フォルダーにして設定の写しを置き(実際の設定ファイルと同じ SHA256)、試験用リポジトリ(日本語・タブ・長い行・途中の追加行を含む変更 1 ファイル、`:sparkles:` を含むコミット、`main` より 1 つ遅れたブランチ)を開いた。起動 → `Enter` → `Esc` → `|` → `|` → `2` → `3` → `4` → `+` → `_` → `q` の各画面を確かめた
+- AlmaLinux 10 の tmux(`tmux-3.3a-13.20230918gitb202a2f.el10`)は `capture-pane` でサーバーが落ちたため、Linux でも tmux は使わなかった
+
+| 環境 | lazygit / delta | 結果 |
+| --- | --- | --- |
+| Windows(確認前) | 0.65.1 / なし | 差分ビューに `delta: command not found` だけが出る。`\|` で内蔵表示に切り替えると読める |
+| abiko-pi(確認前) | 0.66.0 / なし | 同上 |
+| kawasaki-pi(確認前) | 0.65.1 / 0.20.1 | 問題なし |
+| 3 台(確認後) | 0.66.0 / 0.20.1 | 問題なし(`e6081c2`、#10、この追従後の設定のいずれも) |
+
+- 「問題なし」は次をすべて満たしたこと: 自動移行・検証エラーの表示が無い、起動前後で設定の SHA256 が変わらない、マウスの追跡を有効にしない、ファイル一覧に変更行数とアイコンが出る、delta の左右比較が出る、`|` で内蔵表示と行き来できる、`2` の再押下でタブが切り替わる、ブランチにハッシュと `↓1` が出る、コミットに 8 桁のハッシュと ✨ が出る、展開表示の日付が `2006-01-02` 形式、`q` で終了する
+- 0.66.0 では、`Enter` でフォーカスした差分も delta の左右比較のまま表示された(3 台とも)。0.65.1 では内蔵表示になった。2026-10-06 の記録で実 TUI では未試験としていた点
+- 更新前の設定(`dc3873e` に未コミットの delta の変更を載せたもの)を 0.66.0 で起動すると、4 キーの自動移行で設定ファイルが書き換えられた。設定フォルダーは 3 台で同期しているため、更新しないまま abiko-pi で起動すると、書き換えが 3 台に広がるところだった
+
+### 0.66.0 の既定値への追従
+
+- `main` を `scripts/fetch-upstream-config.sh v0.66.0` で更新し、`custom` を rebase した。rebase 前の履歴はタグ `custom-pre-v0.66.0` に残した
+- `config.yml` は、v0.66.0 の既定値の全項目に 17 項目の変更(各値の直上に日本語コメント)を載せた形にした。`git diff main custom -- config.yml` はこの 17 項目だけになる
+  - 0.65.1 の既定値のまま固定していた `gui.theme.selectedLineBgColor`(`blue`)と `inactiveViewSelectedLineBgColor`(`bold`)は、0.66.0 の既定値 `[]`(端末の背景色から自動で決める)になる
+  - 0.66.0 で増えたキー(`gui.colorScheme`・`gui.theme.selectedLineFgColor`・`gui.darkTheme`・`gui.lightTheme`・`gui.commitGraphStyle`・`keybinding.universal.jumpToFile`・`keybinding.main.prevFile` / `nextFile`)を既定値のまま加えた
+- v0.66.0 の JSON スキーマへの照合ではエラーが 2 件出る。`selectedLineBgColor` と `inactiveViewSelectedLineBgColor` の `[]` が、スキーマの `minItems: 1` に合わないため。公式の既定値一覧(docs/Config.md)そのものも同じ 2 件のエラーになり、upstream の master でも同じ。lazygit は `[]` を自動の色として読み、起動時のエラーは出ない
+- 3 台の実 TUI で上の項目がすべて問題なく、`e` も 3 台で動いた
+
+### Windows で確かめたこと
+
+- `scoop install delta` で delta 0.20.1 を入れた。この PC には `VCRUNTIME140.dll` があり、`delta --version` が動いた
+- 描画のコマンドは `cmd /s /c "delta …"` で実行された(コマンドログに表示)。同梱の `config.yml` の delta の行は、そのまま左右比較で表示された
+- README の単一引用符の形は表示が崩れた。速度優先は左の行番号の欄に `''`、区切りに `'│` がそのまま出て、見やすさ優先は `[bat warning]: Unknown theme ''Monokai', using default.` が出て既定のテーマになった。二重引用符の形は `│` を含めて正しく表示された
+- `e`(Neovim 0.12.5。ユーザー設定を読まないよう、XDG の場所を一時フォルダーに向けた): `editInTerminal: false` では Neovim が画面に出ず、端末の無い Neovim のプロセスが残った。その後の lazygit の終了も不安定だった。`true` では Neovim が全画面に出て、`:q!` で Enter を求められずに lazygit に戻った。Pi の Vim 9.1 でも同じ結果だった
+- Windows の lazygit は、`state.yml` と `github_pull_requests.json` を `%LOCALAPPDATA%\lazygit` に作っていた(実際の設定フォルダーで確認)
+
+### 表示の速さ
+
+lazygit の中で `|` を押して、内蔵表示から delta の左右比較に切り替えてから、左右比較が画面に出るまでの時間(7 回の中央値)。内蔵表示は、delta から `|` で戻したときの時間(3 つの設定で測った中央値の範囲)。
+
+| 追加・削除の合計行数 | Windows 同梱設定 | Windows 速度優先 | Windows 見やすさ優先 | Windows 内蔵表示 |
+| --- | ---: | ---: | ---: | ---: |
+| 200行 | 409 ms | 373 ms | 698 ms | 190〜314 ms |
+| 2,000行 | 842 ms | 403 ms | 423 ms | 548〜837 ms |
+| 20,000行 | 385 ms | 1,642 ms | 2,035 ms | 4,435〜7,571 ms |
+
+| 追加・削除の合計行数 | kawasaki-pi 同梱設定 | kawasaki-pi 速度優先 | kawasaki-pi 見やすさ優先 | kawasaki-pi 内蔵表示 |
+| --- | ---: | ---: | ---: | ---: |
+| 200行 | 56 ms | 59 ms | 60 ms | 63〜83 ms |
+| 2,000行 | 101 ms | 102 ms | 116 ms | 264〜292 ms |
+| 20,000行 | 3,783 ms | 3,760 ms | 3,746 ms | 7,497〜10,101 ms |
+
+`git diff | delta` の全文処理時間(下の「delta の表示と性能の検証」と同じ条件。表示幅100列、ANSIによる行末描画、ウォームアップの後にランダムな順で7回測った中央値)。「git diff のみ」は delta を通さない時間。
+
+| 追加・削除の合計行数 | Windows git diff のみ | Windows 同梱設定 | Windows 速度優先 | Windows 見やすさ優先 |
+| --- | ---: | ---: | ---: | ---: |
+| 200行 | 47 ms | 163 ms | 195 ms | 178 ms |
+| 2,000行 | 55 ms | 209 ms | 160 ms | 421 ms |
+| 20,000行 | 106 ms | 1,113 ms | 507 ms | 4,472 ms |
+
+| 追加・削除の合計行数 | kawasaki-pi git diff のみ | kawasaki-pi 同梱設定 | kawasaki-pi 速度優先 | kawasaki-pi 見やすさ優先 |
+| --- | ---: | ---: | ---: | ---: |
+| 200行 | 4 ms | 33 ms | 24 ms | 97 ms |
+| 2,000行 | 22 ms | 179 ms | 103 ms | 773 ms |
+| 20,000行 | 990 ms | 2,522 ms | 1,776 ms | 8,560 ms |
+
+- 差分は、変更なし 3 行と書き換え 2 行の組を繰り返し、追加・削除の合計を 200 / 2,000 / 20,000 行にした 1 ファイル(日本語・タブ・長い行を含む)。既存の測定とは差分の内容と測定機が違うため、数値は直接比べられない
+- 小さな差分では、Windows の表示は Pi の 5〜8 倍の時間がかかった。git(約 40 ms)と delta(scoop の shim 経由で約 52 ms、`delta.exe` を直接起動すると約 29 ms)の起動が Pi(2 ms・5 ms)より長く、表示のたびに起動するため
+- 20,000 行の差分では、CPU の速い Windows のほうが全文処理は速かった。見やすさ優先は構文ハイライトのため、Windows で 4.5 秒、Pi で 8.6 秒かかった
+- Windows はばらつきが大きく、200 行の同梱設定で 299〜1,146 ms だった
+- Windows では、Claude アプリのツール実行環境が付ける `NO_COLOR` を外して測った(付いたままだと lazygit が色を使わない)。delta は `NO_COLOR` に従わないことも確認した
+
+### 今回の未確認範囲
+
+- README の PowerShell のブロック(導入方法・元に戻す)は実機で実行していない。この PC の `%LOCALAPPDATA%\lazygit` は Syncthing で同期している clone のため
+- `VCRUNTIME140.dll` が無い PC での delta、Windows での Vim の `e`、Windows の Neovim の中から開いた lazygit(`nvim-remote`)
+- 実際の GUI の端末でのグリフの見た目(画面は pyte で読み取った文字と色で確認した)、TUI からのコミット・push
 
 ## editInTerminal と Windows 向け手順の確認（2026-10-08）
 
@@ -61,6 +140,8 @@ snacks.nvim の lazygit と同じく、`LG_CONFIG_FILE` の最後に `os.editPre
 - Git for Windows の既定(`core.autocrlf=true`)で取り出したときに備え、改行を CRLF にした `config.yml` でも起動した。delta の描画の設定と `e` の動き(vim が全画面に出て、`:q` で戻る)は LF のときと同じで、ファイルは書き換えられなかった
 
 ### Windows で未検証の項目
+
+このうち、Windows での `e`(Neovim)、引用符と `│` の受け渡し、`config.yml` の delta の行の表示、状態ファイルの置き場所は、同じ日に[実機で確かめた](#windows-で確かめたこと)。
 
 - Windows PowerShell 5.1 への導入方法のブロックの貼り付けと実行(`Move-Item`、`git clone`、`lazygit --print-config-dir` が `C:\Users\<ユーザー名>\AppData\Local\lazygit` を出すこと)
 - Windows PowerShell 5.1 での元に戻すブロック 2 つの実行(`Remove-Item -Recurse -Force` で clone の読み取り専用のファイルも消えること)

@@ -133,7 +133,7 @@ scoop install delta
 delta --version
 ```
 
-Windows の実機での動作は未検証です。確認した範囲は[検証記録](docs/verification/readme.md#editinterminal-と-windows-向け手順の確認2026-10-08)に記載しています。
+Windows 11 の実機で、scoop の delta 0.20.1 と、同梱の `config.yml`・上の二重引用符の形の表示を確認しました。単一引用符の形は表示が崩れます。結果は[検証記録](docs/verification/readme.md#windows-と-raspberry-pi-の実機での検証2026-10-08)に記載しています。
 
 ### 速度を最優先にする設定
 
@@ -143,7 +143,7 @@ Windows の実機での動作は未検証です。確認した範囲は[検証�
 
 `--wrap-max-lines=0` は折り返しを止め、列幅に収まらない部分を省略します。長い行の末尾を確認する場合は差分ビューを拡大するか、見やすさ優先へ切り替えてください。
 
-全文処理時間の比較と測定条件は[検証記録](docs/verification/readme.md#delta-の表示と性能の検証)を参照してください。
+全文処理時間の比較と測定条件は[検証記録](docs/verification/readme.md#delta-の表示と性能の検証)を参照してください。Windows では git と delta の起動に時間がかかるため、小さな差分でも lazygit での表示に 0.4 秒前後かかります([Windows と Raspberry Pi の測定](docs/verification/readme.md#表示の速さ))。
 
 ### 見やすさを優先する設定
 
@@ -175,7 +175,7 @@ Windows の実機での動作は未検証です。確認した範囲は[検証�
 
 ![見やすさを優先したdeltaの左右比較](docs/images/diff-renderers/delta-side-by-side-readable.png)
 
-設定形式と切替操作は [lazygit の公式資料](https://github.com/jesseduffield/lazygit/blob/v0.65.1/docs/Custom_DiffRenderers.md)、左右比較は [delta の公式資料](https://dandavison.github.io/delta/side-by-side-view.html)、各オプションは [delta の公式ヘルプ](https://dandavison.github.io/delta/full---help-output.html)を参照してください。動作確認の環境と内容は[検証記録](docs/verification/readme.md#delta-の表示と性能の検証)に記載しています。
+設定形式と切替操作は [lazygit の公式資料](https://github.com/jesseduffield/lazygit/blob/v0.66.0/docs/Custom_DiffRenderers.md)、左右比較は [delta の公式資料](https://dandavison.github.io/delta/side-by-side-view.html)、各オプションは [delta の公式ヘルプ](https://dandavison.github.io/delta/full---help-output.html)を参照してください。動作確認の環境と内容は[検証記録](docs/verification/readme.md#delta-の表示と性能の検証)に記載しています。
 
 ## 必要になったら検討する項目
 
