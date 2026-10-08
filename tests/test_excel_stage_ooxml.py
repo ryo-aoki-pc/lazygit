@@ -258,7 +258,8 @@ class OoxmlStagingTests(unittest.TestCase):
         calculation = etree.fromstring(parts["xl/workbook.xml"]).find("{" + NS + "}calcPr")
         self.assertEqual(calculation.get("calcMode"), "manual")
         self.assertEqual(calculation.get("fullCalcOnLoad"), "1")
-        self.assertEqual(calculation.get("forceFullCalc"), "1")
+        # A persistent "always fully recalculate" setting must not be added.
+        self.assertIsNone(calculation.get("forceFullCalc"))
 
     def test_namespace_declarations_and_untouched_rich_cells_survive(self):
         parts = package(book_bytes())

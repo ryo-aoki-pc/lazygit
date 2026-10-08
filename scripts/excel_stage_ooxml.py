@@ -530,8 +530,9 @@ class Workbook:
                 workbook.append(calculation)
             else:
                 workbook.insert(workbook.index(following), calculation)
+        # Recalculate stale caches once on open. forceFullCalc would persist as
+        # Excel's "always fully recalculate" setting, so it is left untouched.
         calculation.set("fullCalcOnLoad", "1")
-        calculation.set("forceFullCalc", "1")
         updates[self._workbook_path] = _serialize(tree, self._parts[self._workbook_path])
         relationships = copy.deepcopy(self._trees[self._workbook_rels])
         rels = relationships.getroot()
