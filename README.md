@@ -9,7 +9,7 @@
 | `main` | upstream(lazygit 公式)のデフォルト設定。直接編集しない |
 | `custom` | `main` の上に自分用のカスタマイズを積んだブランチ(デフォルトブランチ) |
 
-- 取得元タグ: **v0.65.1**
+- 取得元タグ: **v0.66.0**
 - `config.yml` は [`scripts/fetch-upstream-config.sh`](./scripts/fetch-upstream-config.sh) の出力そのものです(手で編集しない)
 
 ## カスタマイズ内容の差分を見る
