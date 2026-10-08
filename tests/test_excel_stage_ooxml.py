@@ -166,6 +166,42 @@ class OoxmlStagingTests(unittest.TestCase):
         node = cell_node(etree.fromstring(package(result)["xl/worksheets/sheet1.xml"]), "A1")
         self.assertEqual(node.get("t"), "inlineStr")
 
+    def test_phonetic_readings_are_plain_text_but_formatted_runs_are_rejected(self):
+        # Japanese Excel keeps readings (rPh) and their settings (phoneticPr)
+        # beside the text of ordinary shared and inline strings.
+        strings = (
+            '<sst xmlns="' + NS + '">'
+            '<si><t>売上</t><rPh sb="0" eb="2"><t>ウリアゲ</t></rPh><phoneticPr fontId="1"/></si>'
+            '<si><t>大阪</t><rPh sb="0" eb="2"><t>オオサカ</t></rPh><phoneticPr fontId="1"/></si>'
+            '<si><r><rPr><b/></rPr><t>太字</t></r></si></sst>'
+        ).encode("utf-8")
+
+        def book(index, inline_text):
+            def cells(root):
+                node = cell_node(root, "A1")
+                for child in list(node):
+                    node.remove(child)
+                node.set("t", "s")
+                etree.SubElement(node, "{" + NS + "}v").text = str(index)
+                inline = cell_node(root, "C1").find("{" + NS + "}is")
+                inline.find("{" + NS + "}t").text = inline_text
+                etree.SubElement(inline, "{" + NS + "}phoneticPr", fontId="1")
+
+            def relationship(root):
+                etree.SubElement(root, "{" + REL_NS + "}Relationship", Id="rIdStrings", Type=DOC_REL_NS + "/sharedStrings", Target="sharedStrings.xml")
+
+            data = edit_xml(book_bytes(), "xl/worksheets/sheet1.xml", cells)
+            data = edit_xml(data, "xl/_rels/workbook.xml.rels", relationship)
+            return OOXML.Workbook(replace_parts(data, {"xl/sharedStrings.xml": strings}))
+
+        base = book(0, "東京")
+        self.assertEqual(base.cells[("1", "A1")], OOXML.Cell("string", "売上"))
+        result = OOXML.Workbook(base.rebuild(book(1, "名古屋"), {("1", "A1"), ("1", "C1")}))
+        self.assertEqual(result.cells[("1", "A1")], OOXML.Cell("string", "大阪"))
+        self.assertEqual(result.cells[("1", "C1")], OOXML.Cell("string", "名古屋"))
+        with self.assertRaises(OOXML.WorkbookError):
+            base.rebuild(book(2, "東京"), {("1", "A1")})
+
     def test_number_format_and_formula_cache_changes_do_not_change_cell_values(self):
         original = book_bytes()
 

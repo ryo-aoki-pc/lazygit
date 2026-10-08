@@ -36,6 +36,9 @@ class Sheet:
 _COORDINATE = re.compile(r"^([A-Z]{1,3})([1-9][0-9]{0,6})$")
 _XML_SPACE = "{http://www.w3.org/XML/1998/namespace}space"
 _KINDS = {"number", "string", "boolean", "error", "date", "formula"}
+# Japanese Excel saves readings (furigana) beside plain text: rPh holds the
+# reading and phoneticPr its settings. Neither is rich text formatting.
+_PLAIN_STRING = {"t", "rPh", "phoneticPr"}
 
 
 def coordinate_key(coordinate):
@@ -247,7 +250,7 @@ class Workbook:
             path = _target(self._workbook_path, string_rels[0].get("Target", ""))
             for node in self._read_xml(path).getroot():
                 if _local(node) == "si":
-                    if any(_local(child) not in ("t",) for child in node):
+                    if any(_local(child) not in _PLAIN_STRING for child in node):
                         self._rich_strings.add(len(strings))
                     strings.append(_string(node))
         sheets = _child(workbook, "sheets")
@@ -349,7 +352,7 @@ class Workbook:
                 elif kind == "inlineStr":
                     inline = _child(node, "is")
                     if inline is not None:
-                        if any(_local(child) != "t" for child in inline):
+                        if any(_local(child) not in _PLAIN_STRING for child in inline):
                             unsafe = "リッチテキスト"
                         cell = Cell("string", _string(inline))
                 elif kind == "s" and value is not None:
