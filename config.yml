@@ -404,10 +404,20 @@ git:
   #
   # See https://github.com/jesseduffield/lazygit/blob/master/docs/Custom_DiffRenderers.md
   # for more information.
-  # 構文ハイライトを省いた delta で左右比較し、| キーで内蔵表示へ切り替え
+  # delta の左右比較(標準・速度優先・見やすさ優先)と内蔵表示を | キーで切り替え(引用符は Linux と Windows で共通の二重引用符)
   diffRenderers:
     - command: delta --no-gitconfig --dark --paging=never --syntax-theme=none --tabs=4 --side-by-side
       name: delta side-by-side
+    - command: >-
+        delta --no-gitconfig --dark --paging=never --syntax-theme=none --tabs=4 --side-by-side
+        --raw --inspect-raw-lines=false --word-diff-regex="(?s).+" --max-line-distance=1
+        --line-numbers-left-format="" --line-numbers-right-format="│ " --wrap-max-lines=0
+      colorArg: never
+      name: delta side-by-side fast
+    - command: >-
+        delta --no-gitconfig --dark --paging=never --tabs=4 --side-by-side --line-numbers
+        --syntax-theme="Monokai Extended" --wrap-max-lines=unlimited
+      name: delta side-by-side readable
     - type: rawGit
       name: default
 
