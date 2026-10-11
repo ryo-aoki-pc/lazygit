@@ -1,5 +1,8 @@
 # lazygit 設定ファイル
 
+導入・利用・更新は [AlmaLinux 10 の手順](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/almalinux-setup.md) / [Windows 11 の手順](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md) に集約している。設定仕様・開発者向け操作・過去の検証・ロールバックはこのリポジトリで管理する。
+
+
 [lazygit](https://github.com/jesseduffield/lazygit) を便利に使うための設定ファイル([`config.yml`](config.yml))です。
 
 [設定内容・ブランチ構成](docs/reference/readme.md) / [検証記録](docs/verification/readme.md)
@@ -15,60 +18,9 @@
 
 ## 導入方法
 
-`config.yml` を lazygit の設定ディレクトリに配置します(ディレクトリは `lazygit --print-config-dir` で確認できます)。
+[AlmaLinux 10](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/almalinux-setup.md#lazygit-の設定を導入する) / [Windows 11](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md#lazygit-の設定を導入する)
 
-| OS | 配置場所 |
-| --- | --- |
-| Linux | `~/.config/lazygit/config.yml` |
-| macOS | `~/Library/Application Support/lazygit/config.yml` |
-| Windows | `%LOCALAPPDATA%\lazygit\config.yml` |
-
-このリポジトリをクローンしてシンボリックリンクを張る場合(Linux の例):
-
-```sh
-git clone https://github.com/ryo-aoki-pc/lazygit.git ~/lazygit-config
-mkdir -p ~/.config/lazygit
-ln -sf ~/lazygit-config/config.yml ~/.config/lazygit/config.yml
-```
-
-このリポジトリを設定ディレクトリに直接クローンする場合(Windows の例。lazygit を終了してから Windows PowerShell に貼り付けます):
-
-```powershell
-$d = "$env:LOCALAPPDATA\lazygit"
-if (Test-Path -LiteralPath "$d.bak") {
-  Write-Warning "$d.bak がすでにあるため中止しました。中身を確かめて片付けてから、貼り直してください"
-} else {
-  if (Test-Path -LiteralPath $d) { Move-Item -LiteralPath $d -Destination "$d.bak" -ErrorAction Stop; "moved: $d -> $d.bak" }
-  git clone https://github.com/ryo-aoki-pc/lazygit.git $d
-  git -C $d branch --show-current
-  lazygit --print-config-dir
-}
-```
-
-- Windows ではシンボリックリンクの作成に開発者モードか管理者権限が必要なため、リンクではなく設定ディレクトリ `%LOCALAPPDATA%\lazygit` に直接クローンします
-- 既存の `%LOCALAPPDATA%\lazygit`(以前の設定と状態ファイル)は `lazygit.bak` に退避します。`lazygit.bak` がすでにある場合は、退避もクローンもせずに警告を出して止まります
-- `custom`(既定のブランチ)と `C:\Users\<ユーザー名>\AppData\Local\lazygit` が表示されれば完了です
-- Windows の lazygit は状態ファイル(`state.yml` など)も同じフォルダーに作りますが、[`.gitignore`](.gitignore) で `state.yml`・`github_pull_requests.json`・`development.log` を除外しているため、`git status` には出ません
-- Windows の実機ではまだ実行していません。確認した範囲は[検証記録](docs/verification/readme.md#editinterminal-と-windows-向け手順の確認2026-10-08)に記載しています
-- 元に戻す場合は、lazygit を終了し、次の 1 つ目のブロックで何も表示されない(未コミット・未 push の変更が無い)ことを確かめてから、2 つ目のブロックを貼り付けます
-
-```powershell
-$d = "$env:LOCALAPPDATA\lazygit"
-git -C $d status --short
-git -C $d log --oneline '@{u}..'
-```
-
-```powershell
-$d = "$env:LOCALAPPDATA\lazygit"
-Remove-Item -LiteralPath $d -Recurse -Force
-if (Test-Path -LiteralPath "$d.bak") { Move-Item -LiteralPath "$d.bak" -Destination $d }
-```
-
-ファイルを置かずに一時的に試す場合:
-
-```sh
-lazygit --use-config-file ~/lazygit-config/config.yml
-```
+macOS の設定場所は `~/Library/Application Support/lazygit/config.yml`。Linux / Windows の操作は上の正本で行う。
 
 ## delta の設定と表示
 
@@ -76,9 +28,8 @@ lazygit --use-config-file ~/lazygit-config/config.yml
 
 ### 設定手順
 
-1. `delta --version` で導入を確認します。Homebrew を使う場合は `brew install git-delta`、Windows の scoop では `scoop install delta` で導入できます(Windows は[Windows で使う場合](#windows-で使う場合)も参照)。
-2. `lazygit --print-config-dir` で設定ディレクトリを確認し、その中の `config.yml` を開きます。既存の `git.diffRenderers` を下の4項目に置き換えます。`git:` がすでにある場合は、その中に設定してください。このリポジトリの `config.yml` を配置した場合は、すでに同じ設定になっています。
-3. 保存後に lazygit を終了して再起動します。
+
+このリポジトリの `config.yml` は、以下の4種類を設定済み。導入は [AlmaLinux 10](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/almalinux-setup.md#lazygit-の設定を導入する) / [Windows 11](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md#lazygit-の設定を導入する)。変更時は保存して lazygit を起動し直す。
 
 ```yaml
 git:
@@ -99,29 +50,14 @@ git:
       name: default
 ```
 
-起動時は最初の `delta side-by-side`(標準)が選ばれます。`|` キーを押すたびに、標準 → 速度優先 → 見やすさ優先 → 内蔵表示 → 標準の順に切り替わります。別の表示を初期表示にする場合は、その項目を `diffRenderers` 配列の先頭に移動してください。
-
-| 名前 | 表示 | 向いている場面 |
-| --- | --- | --- |
-| `delta side-by-side`(標準) | 構文ハイライトを省き、行番号と単語単位の強調を残した左右比較 | 普段の差分の確認 |
-| `delta side-by-side fast`(速度優先) | 行番号と単語単位の強調も省き、長い行を列幅で省略 | 大きな差分を素早く確認 |
-| `delta side-by-side readable`(見やすさ優先) | 構文ハイライト・行番号・単語単位の強調を使い、長い行を折り返す | 変更内容を詳しく確認 |
-| `default`(内蔵表示) | lazygit の内蔵の差分表示 | delta を通さずに確認 |
-
-共通の `--no-gitconfig` は Git 側の delta 設定を読み込まず、この設定の表示を使います。`--paging=never` は外部ページャを起動せず、`--tabs=4` は lazygit のタブ幅に揃えます。ダーク背景向けのため、ライト背景の端末では3つの `--dark` を `--light` にし、見やすさ優先の構文テーマを `--syntax-theme=GitHub` に変更してください。
-
-左右比較では変更前が左、変更後が右に並びます。表示幅が足りない場合は、`0` キーで差分ビューにフォーカスし、`+` キーで拡大してください。ファイル一覧やコミットの差分閲覧で有効です。lazygit 0.66.0 では、Enter で差分ビューに入り、delta 0.20.1 の表示を保ったまま行・ハンクを選択できます。lazygit 0.65.1 では、Enter で入るステージング画面は内蔵表示になります。
+起動時は先頭の表示を使う。`|` で標準 → 速度優先 → 見やすさ優先 → 内蔵表示を切り替える。初期表示を変える場合は `diffRenderers` の先頭へ移す。
 
 ### Windows で使う場合
 
+
 Windows の lazygit は、描画のコマンドを `cmd /s /c "<コマンド>"`(cmd.exe)で実行します。cmd.exe も delta.exe の引数の解釈も単一引用符 `'…'` を引用符として扱わないため、`'` が値に残ったり、空白で引数が分かれたりします。このため、上の設定は値を二重引用符 `"…"` で囲んでいます。二重引用符の形は Linux でも単一引用符の形と同じ表示になるため、OS ごとに書き換える必要はありません。オプションを書き足す場合も、値は二重引用符で囲んでください。
 
-Windows の `delta.exe` は Visual C++ ランタイム(`VCRUNTIME140.dll`)を必要とします。scoop の `delta` はランタイムを含まないため、PowerShell で `Test-Path "$env:WINDIR\System32\vcruntime140.dll"` が `False` の場合は、先に [Visual C++ 再頒布可能パッケージ](https://learn.microsoft.com/ja-jp/cpp/windows/latest-supported-vc-redist)の X64 版を入れてから(インストールには管理者の承認が要ります。winget では `winget install --exact --id Microsoft.VCRedist.2015+.x64`)、delta を入れてください。
-
-```powershell
-scoop install delta
-delta --version
-```
+delta 本体と VC++ ランタイムの導入・確認は [Windows 11 の git-delta](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md#git-delta)で行う。
 
 Windows 11 の実機で、scoop の delta 0.20.1 と、標準・速度優先・見やすさ優先の各コマンド(速度優先と見やすさ優先は二重引用符の形)の表示を確認しました。単一引用符の形は表示が崩れます。結果は[検証記録](docs/verification/readme.md#windows-と-raspberry-pi-の実機での検証2026-10-08)に記載しています。4項目を切り替える今の `config.yml` は、Linux の lazygit で確認しました([検証記録](docs/verification/readme.md#delta-の表示の切り替えを既定にする2026-10-09))。
 
@@ -173,23 +109,8 @@ Windows 11 の実機で、scoop の delta 0.20.1 と、標準・速度優先・�
 
 ## Excel の差分表示
 
-Git の `textconv` で Excel をシート名・セル番地・値・数式のテキストに変換し、同じ delta の左右比較で表示できます。同梱の `config.yml` は、ファイル一覧の `E` で Excel の部分ステージ画面も開きます。Python 3.9 以降、lazygit 0.66.0 以降、delta 0.20.1 以降を用意し、このリポジトリのフォルダーで次を実行します。
 
-Linux / macOS:
-
-```sh
-python3 scripts/setup-excel-diff.py
-```
-
-Windows(PowerShell。scoop の Python なら `scoop install python` で導入):
-
-```powershell
-python scripts/setup-excel-diff.py
-```
-
-設定はその端末の Git 全体に適用されます。Python の依存ライブラリと Excel 用スクリプトは設定リポジトリの外に専用の仮想環境を作って導入し、既存の属性設定を残して Excel 用の行を追加します。`git excel-stage -- "売上表.xlsx"` も登録します。Syncthing で設定リポジトリを同期している場合も、導入は各端末で一度ずつ実行してください。変換に 2 秒以上かかる大きいブックは「変換中」と表示して裏で変換を続けるため、待たずに操作を続けられます([詳細](docs/excel-diff.md#大きいブックの表示))。
-
-既存の `.xlsx` / `.xlsm` / `.xltx` / `.xltm` は、`E` → `Enter` → `Space` でセル値・通常の数式のハンクを選択し、専用画面の `X` で元の Excel のままステージできます。適用後は `q` で戻ります。`X` の前に `q` で終了すれば選択を取り消します。作業中の Excel は書き換えず、index 側の書式・画像・マクロを保持します。通常の Excel 差分画面では行・ハンクをステージせず、部分ステージには `E` を使ってください。対応条件と制限は [Excel 差分の手順](docs/excel-diff.md#excel-の部分ステージ)を参照してください。
+Excel の差分表示・部分ステージは [AlmaLinux 10](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/almalinux-setup.md#lazygit-の-excel-差分表示を導入する任意) / [Windows 11](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md#lazygit-の-excel-差分表示を導入する任意) に集約した。[仕様・対応条件](docs/extra/excel-diff.md)・[検証記録](docs/verification/readme.md)はこのリポジトリに残す。macOS の導入は [docs/excel-diff.md](docs/excel-diff.md#macos-の導入)。
 
 ## 必要になったら検討する項目
 
