@@ -18,19 +18,11 @@ Windows の lazygit 0.66.0 は、別のファイルへ移っても実行中の�
 - 変換結果はブックの内容(SHA-256)ごとにキャッシュし、同じ内容は 2 回目から変換しない。キャッシュは合計 512 MB を超えた分と、30 日使わなかった分から消える。導入スクリプトを再実行すると、古い版の変換スクリプトのキャッシュも消す
 - Git の変換キャッシュ(`diff.excel.cachetextconv`)は仮の内容まで保存してしまうため使わない
 
-待つ時間は環境変数 `EXCEL_TEXTCONV_TIMEOUT`(秒)で変えられます。`0` にすると変換が終わるまで待ちます。コマンドラインの `git diff` で必ず全セルを表示する場合は次のように実行します。
-
-
+待つ時間は環境変数 `EXCEL_TEXTCONV_TIMEOUT`(秒)で変えられます。`0` にすると変換が終わるまで待ちます。設定する操作は [AlmaLinux 10](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/almalinux-setup.md#lazygit-で大きな-excel-の変換を待つ任意) / [Windows 11](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md#lazygit-で大きな-excel-の変換を待つ任意) を参照してください。
 
 PowerShell の設定は、そのウィンドウで後から実行するコマンドにも効きます。元に戻すときは `Remove-Item Env:EXCEL_TEXTCONV_TIMEOUT` を実行します。
 
-1. lazygit のファイル一覧で、変更した既存の `.xlsx` / `.xlsm` / `.xltx` / `.xltm` を選び、`E` を押します。
-2. 専用画面で `Enter` を押して delta の左右比較へ入り、`Space` で必要なハンクを選択します。左右の矢印でハンクを移動できます。選択した内容は専用画面のステージ済み差分で確認できます。
-3. 選択を確認して `X` を押すと、選択したセルの変更を元のリポジトリへステージします。適用結果を確認したら `q` で元の画面へ戻ります。`X` はこの専用画面だけの操作です。適用前に `q` で終了すれば、元のリポジトリは変更せず選択を取り消します。
-
-端末から直接開くこともできます。
-
-
+部分ステージの操作と端末から直接開く方法は [AlmaLinux 10](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/almalinux-setup.md#lazygit-で-excel-のセル変更を部分ステージする) / [Windows 11](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md#lazygit-で-excel-のセル変更を部分ステージする) にあります。
 対象は HEAD と index の両方に既存の Excel があるファイルです。すでにステージ済みの変更がある場合は、その版を基準に、残りのセル変更を追加できます。新規ファイルは一度全体をコミットしてから部分ステージの対象になります。作業中の Excel は書き換えません。ファイル全体をステージする場合は、元の lazygit のファイル一覧で `Space` を使ってください。
 
 専用画面ではセルの値と通常の数式を比較し、index 側の書式・画像・マクロ・テンプレート形式を保持します。数式の計算結果キャッシュや、書式だけの変更は選択対象にしません。通常の閲覧用 textconv は表示形式に応じて日付・時刻を表示するため、専用画面とは値の表示が異なる場合があります。

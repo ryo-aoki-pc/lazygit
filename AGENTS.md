@@ -36,6 +36,7 @@ Windows 11・AlmaLinux 10 の導入・利用・更新・任意操作は、setup-
 - `scripts/fetch-upstream-config.sh` — 上流の既定の設定を取り出す（`main` の更新用）
 - `tests/` — unittest
 - `.gitignore` — Windows の lazygit が同じフォルダーに作る状態ファイル（`state.yml` など）を除く
+- [docs/extra/readme.md](docs/extra/readme.md) — Windows で退避した設定を戻す手順
 
 ## テスト
 

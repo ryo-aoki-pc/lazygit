@@ -22,6 +22,8 @@
 
 macOS の設定場所は `~/Library/Application Support/lazygit/config.yml`。Linux / Windows の操作は上の正本で行う。
 
+Windows で退避した設定に戻すときは [設定のロールバック](docs/extra/readme.md)を行う。
+
 ## delta の設定と表示
 
 このリポジトリの `config.yml` は、見やすさと速さの違う delta の左右比較3種類(標準・速度優先・見やすさ優先)と lazygit の内蔵表示を、`|` キーで切り替えて使います。引用符を二重引用符に揃えているため、Linux・macOS・Windows で同じ設定をそのまま使えます。
