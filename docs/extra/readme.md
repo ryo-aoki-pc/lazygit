@@ -1,0 +1,21 @@
+# lazygit の設定を戻す
+
+Windows 11 の自分のユーザーの Windows PowerShell で行う。lazygit を終了し、手順 1 で未コミット・未 push の変更が無いことを確かめてから削除へ進む。退避した設定は `%LOCALAPPDATA%\lazygit.bak` にある。
+
+1. lazygit を終了し、未コミット・未 push の変更がないか確かめる。
+
+   ```powershell
+   $d = "$env:LOCALAPPDATA\lazygit"
+   git -C $d status --short
+   git -C $d log --oneline '@{u}..'
+   ```
+
+   - 何も出ないことを確かめ、必要な変更は別の場所へ退避してから次へ進む
+
+1. clone を消して退避した設定を戻す（取り戻せない）。
+
+   ```powershell
+   $d = "$env:LOCALAPPDATA\lazygit"
+   Remove-Item -LiteralPath $d -Recurse -Force
+   if (Test-Path -LiteralPath "$d.bak") { Move-Item -LiteralPath "$d.bak" -Destination $d }
+   ```
