@@ -114,7 +114,7 @@ Windows 11 の実機で、scoop の delta 0.20.1 と、標準・速度優先・�
 ## Excel の差分表示
 
 
-Excel の差分表示・部分ステージは [AlmaLinux 10](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/almalinux-setup.md#lazygit-の-excel-差分表示を導入する任意) / [Windows 11](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md#lazygit-の-excel-差分表示を導入する任意) に集約した。[仕様・対応条件](docs/extra/excel-diff.md)・[検証記録](docs/verification/readme.md)はこのリポジトリに残す。macOS の導入は [docs/excel-diff.md](docs/excel-diff.md#macos-の導入)。
+Excel の差分表示・部分ステージは [AlmaLinux 10](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/almalinux-setup.md#lazygit-の-excel-差分表示を導入する) / [Windows 11](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md#lazygit-の-excel-差分表示を導入する) に集約した。[仕様・対応条件](docs/extra/excel-diff.md)・[検証記録](docs/verification/readme.md)はこのリポジトリに残す。macOS の導入は [docs/excel-diff.md](docs/excel-diff.md#macos-の導入)。
 
 ## 必要になったら検討する項目
 
