@@ -6,29 +6,17 @@
 
 ## 導入手順の正本
 
-Windows 11・AlmaLinux 10 の導入・利用・更新・任意操作は、setup-notes の [windows-setup.md](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md) と [almalinux-setup.md](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/almalinux-setup.md) に集約する。既存の手順も対象とする。
-
-- 固有の仕様・他 OS の手順・開発者検査・理由・注意・検証記録・ロールバックが残る文書は保持する
-- 案内だけになった旧文書は削除する。README から上の2冊と[集約対応表](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/dev/consolidation-map.md)へ案内する
-
-文書規則は、Windows・AlmaLinux の実行手順には上の正本へ適用する。操作や移動先を変えたら正本・README・集約対応表・参照情報を同期し、過去の検証本文は保持する。共通 bash 設定が読むツールの初期化を `~/.bashrc` に直接追記しない。
+導入・更新・使い方の手順は、setup-notes の [almalinux-setup.md](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/almalinux-setup.md#lazygit) と [windows-setup.md](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md#lazygit) の「lazygit」とその子の項（設定の導入・Excel の差分表示）にある。このリポジトリには置かない。Windows 11 の設定のロールバックと、macOS の導入（Excel の差分表示）は、このリポジトリに置く。
 
 ## このリポジトリは何か
 
-[lazygit](https://github.com/jesseduffield/lazygit) の自分用の設定（`config.yml`）と、Excel の差分表示・部分ステージの道具。使い方は [README.md](README.md)、設定の中身は [docs/reference/readme.md](docs/reference/readme.md)、Excel の道具は [docs/excel-diff.md](docs/excel-diff.md)、検証記録は [docs/verification/readme.md](docs/verification/readme.md)。
+[lazygit](https://github.com/jesseduffield/lazygit) の自分用の設定（`config.yml`）と、Excel の差分表示・部分ステージの道具。導入の表と、このリポジトリの運用は [README.md](README.md)、設定の中身は [docs/reference/readme.md](docs/reference/readme.md)、Excel の道具は [docs/excel-diff.md](docs/excel-diff.md)、検証記録は [docs/verification/readme.md](docs/verification/readme.md)。
 
 ドキュメント・コミットメッセージ・Pull Request の説明は日本語で書く。
 
 ### ブランチ構成
 
-| ブランチ | 内容 |
-| --- | --- |
-| `custom` | 実際に使う設定（既定のブランチ）。`main` の上に自分の変更を積んだもの。作業はここから始める |
-| `main` | lazygit 公式の既定の設定（`docs/Config.md` の Default の節）をそのまま置いた、上流の追従用。直接編集しない |
-
-- `custom` の `config.yml` は `main` の全項目の形を保ち、変えたい値だけを書き換える（項目の削除・並べ替え・独自のヘッダの追加はしない）
-- 自分の変更は `git diff main custom -- config.yml` で見る
-- 上流の新しい版への追従は、`main` で `scripts/fetch-upstream-config.sh <タグ>` を実行してコミットし、`custom` を `git rebase main` で載せ直す（README の「このリポジトリの運用」）
+`custom` が実際に使う設定（既定のブランチ。作業はここから始める）、`main` が lazygit 公式の既定の設定を置いた上流の追従用（直接編集しない）。`config.yml` の書き換え方と上流への追従は、README の「このリポジトリの運用」に従う。
 
 ## 構成
 
@@ -39,7 +27,8 @@ Windows 11・AlmaLinux 10 の導入・利用・更新・任意操作は、setup-
 - `scripts/fetch-upstream-config.sh` — 上流の既定の設定を取り出す（`main` の更新用）
 - `tests/` — unittest
 - `.gitignore` — Windows の lazygit が同じフォルダーに作る状態ファイル（`state.yml` など）を除く
-- [docs/extra/readme.md](docs/extra/readme.md) — Windows で退避した設定を戻す手順
+- `docs/excel-diff.md` — Excel の差分表示の仕様と検査・macOS の導入。`docs/extra/excel-diff.md` — その対応条件と制限（注意点）
+- `docs/extra/readme.md` — Windows 11 の設定のロールバック。`docs/reference/readme.md` — 設定の中身と理由。`docs/verification/readme.md` — 検証記録。`docs/images/` — README の画像
 
 ## テスト
 
@@ -50,9 +39,11 @@ python3 -B -m unittest discover -s tests -v
 - リポジトリの直下で動かす。Windows は `python`
 - openpyxl などの依存は、`scripts/setup-excel-diff.py` が作る仮想環境の Python で動かすと揃う（[docs/excel-diff.md](docs/excel-diff.md) の「自動検証」）
 
-## 書き方の規則
+## 文書の置き場所
 
-- Windows・AlmaLinux の操作は setup-notes の2冊、設定の中身と理由は `docs/reference/readme.md`、実施日・環境・結果は `docs/verification/readme.md` に分ける
+- 導入・利用・更新の手順は正本に置き、README の「導入」の表から正本の項へ直接リンクする（手順書の先頭やカテゴリの見出しへはリンクしない）。執筆規則は setup-notes の `docs/dev/writing-rules.md`
+- `docs/extra/` はロールバックと注意点、`docs/reference/` は設定の中身と理由、`docs/verification/` は検証記録（実施日・環境・結果・未確認事項）。テストのコマンドは上の「テスト」
+- 案内だけになった文書・節は消し、旧パスと移動先を setup-notes の集約対応表に足す。消すときは参照元のリンクを付け替える（検証記録は、削除前の固定コミットの URL にする）
 - 検証していないことを「動く」と書かない。検証記録の過去の節は書き換えず、新しい節を足す
 
 ## 共同作業の規則

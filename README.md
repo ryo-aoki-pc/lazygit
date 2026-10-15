@@ -1,39 +1,36 @@
 # lazygit 設定ファイル
 
-導入・利用・更新は [AlmaLinux 10 の手順](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/almalinux-setup.md) / [Windows 11 の手順](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md) に集約している。設定仕様・開発者向け操作・過去の検証・ロールバックはこのリポジトリで管理する。
+[lazygit](https://github.com/jesseduffield/lazygit) を便利に使うための設定ファイル（[`config.yml`](config.yml)）です。
 
-移動先は[集約対応表](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/dev/consolidation-map.md)で確認する。
+## 導入
 
+- 対象: AlmaLinux 10 と Windows 11 の自分のユーザー。手順は setup-notes にあり、フォントと git-delta、本体を入れてから、この設定を入れる
+- macOS の設定の置き場所は `~/Library/Application Support/lazygit/config.yml`（手順と検証は無い）
 
-[lazygit](https://github.com/jesseduffield/lazygit) を便利に使うための設定ファイル([`config.yml`](config.yml))です。
+| | AlmaLinux 10 | Windows 11 |
+| --- | --- | --- |
+| フォント（Nerd Fonts） | [HackGen Console NF](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/shell-terminal.md#hackgen-console-nf) | [Windows 11 で HackGen Console NF を入れる](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/shell-terminal.md#windows-11-で-hackgen-console-nf-を入れる) |
+| 差分の表示に使う git-delta | [git-delta](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/almalinux-setup.md#git-delta) | [git-delta](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md#git-delta) |
+| 本体とこの設定 | [lazygit](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/almalinux-setup.md#lazygit) (手順 2 で「lazygit の設定を導入する」も通す) | [lazygit](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md#lazygit) (手順 5 で「lazygit の設定を導入する」も通す) |
+| この設定だけ (本体が入っているとき) | [lazygit の設定を導入する](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/almalinux-setup.md#lazygit-の設定を導入する) | [lazygit の設定を導入する](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md#lazygit-の設定を導入する) |
+| Excel の差分表示（任意） | [lazygit の Excel 差分表示を導入する](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/almalinux-setup.md#lazygit-の-excel-差分表示を導入する) | [lazygit の Excel 差分表示を導入する](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md#lazygit-の-excel-差分表示を導入する) |
+| 本体の更新 | [共通の bash 設定・Homebrew・Flatpak を上げる](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/almalinux-setup.md#共通の-bash-設定homebrewflatpak-を上げる)の手順 2・3 | [scoop・winget・WSL を上げる](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md#scoopwingetwsl-を上げる)の手順 2・3 |
+| 戻す | [Git の道具を消す](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/extra/almalinux-setup.md#git-の道具を消す)の手順 1 (この設定の clone とリンクの消し方は、その箇条書き) | [Git の道具を消す](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/extra/windows-setup.md#git-の道具を消す)の手順 1・2 (この設定だけ戻すなら [Windows 11 のロールバック](docs/extra/readme.md#windows-11-のロールバック)) |
 
-[設定内容・ブランチ構成](docs/reference/readme.md) / [検証記録](docs/verification/readme.md)
+- この設定は、Nerd Fonts（v3 系）と git-delta を前提にしている。入れないときは、次の設定を外す
 
-## 前提ツール
-
-この設定は以下を有効化した状態になっています。未導入の場合はインストールするか、該当設定を無効化してください。
-
-| ツール | 用途 | 未導入の場合 |
+| ツール | 用途 | 入れないとき |
 | --- | --- | --- |
 | [Nerd Fonts](https://www.nerdfonts.com/)(v3系) | ファイルアイコン等の表示 | `gui.nerdFontsVersion` を `""` にする |
 | [git-delta](https://github.com/dandavison/delta) | 左右比較と単語単位の変更強調を含む差分表示 | `git.diffRenderers` を `[]` に戻す |
 
-## 導入方法
-
-[AlmaLinux 10](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/almalinux-setup.md#lazygit-の設定を導入する) / [Windows 11](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md#lazygit-の設定を導入する)
-
-macOS の設定場所は `~/Library/Application Support/lazygit/config.yml`。Linux / Windows の操作は上の正本で行う。
-
-Windows で退避した設定に戻すときは [設定のロールバック](docs/extra/readme.md)を行う。
+- この設定の新しい版は、上流の lazygit に合わせて「[このリポジトリの運用](#このリポジトリの運用)」のとおり作る
 
 ## delta の設定と表示
 
 このリポジトリの `config.yml` は、見やすさと速さの違う delta の左右比較3種類(標準・速度優先・見やすさ優先)と lazygit の内蔵表示を、`|` キーで切り替えて使います。引用符を二重引用符に揃えているため、Linux・macOS・Windows で同じ設定をそのまま使えます。
 
-### 設定手順
-
-
-このリポジトリの `config.yml` は、以下の4種類を設定済み。導入は [AlmaLinux 10](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/almalinux-setup.md#lazygit-の設定を導入する) / [Windows 11](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md#lazygit-の設定を導入する)。変更時は保存して lazygit を起動し直す。
+このリポジトリの `config.yml` は、以下の4種類を設定済みです。変更したら保存して lazygit を起動し直します。
 
 ```yaml
 git:
@@ -113,8 +110,7 @@ Windows 11 の実機で、scoop の delta 0.20.1 と、標準・速度優先・�
 
 ## Excel の差分表示
 
-
-Excel の差分表示・部分ステージは [AlmaLinux 10](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/almalinux-setup.md#lazygit-の-excel-差分表示を導入する) / [Windows 11](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md#lazygit-の-excel-差分表示を導入する) に集約した。[仕様・対応条件](docs/extra/excel-diff.md)・[検証記録](docs/verification/readme.md)はこのリポジトリに残す。macOS の導入は [docs/excel-diff.md](docs/excel-diff.md#macos-の導入)。
+Excel のブックの差分をセルのテキストで出し、セルの変更を選んで部分ステージできます。導入は[導入](#導入)の表、確かめ方・部分ステージ・大きいブックの扱いは、その後ろの setup-notes の項（[AlmaLinux 10](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/almalinux-setup.md#lazygit-で-excel-の差分を確かめる) / [Windows 11](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md#lazygit-で-excel-の差分を確かめる) から順に）にあります。表示する内容・自動検証・macOS の導入は [docs/excel-diff.md](docs/excel-diff.md)、対応条件と制限は [docs/extra/excel-diff.md](docs/extra/excel-diff.md) にあります。
 
 ## 必要になったら検討する項目
 
@@ -136,3 +132,12 @@ Excel の差分表示・部分ステージは [AlmaLinux 10](https://github.com/
 - `custom` の `config.yml` は `main` の全項目形式を保ち、変えたい値だけを書き換えます(項目の削除・並べ替え・独自ヘッダの追加はしない)。版の互換性に必要なキーの改名・移動は[検証記録](docs/verification/readme.md)に残します。変更した値の直上に日本語コメントを 1 行付けます。
 - upstream(lazygit の新バージョン)への追従は、`main` で [`scripts/fetch-upstream-config.sh`](scripts/fetch-upstream-config.sh) を実行してコミットし、
   `custom` を `git rebase main` で載せ直します(手順の詳細は `main` ブランチの README を参照)。
+
+## 文書
+
+- [設定内容](docs/reference/readme.md)
+- [Excel の差分表示の仕様と検査](docs/excel-diff.md)・[注意点](docs/extra/excel-diff.md)
+- [Windows 11 の設定のロールバック](docs/extra/readme.md)
+- [検証記録](docs/verification/readme.md)
+- テストのコマンドと、変更するときの決まりは [AGENTS.md](AGENTS.md)
+- 旧手順書の移動先: setup-notes の[集約対応表](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/dev/consolidation-map.md)

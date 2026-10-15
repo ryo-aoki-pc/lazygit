@@ -1,6 +1,6 @@
 # lazygit 設定リファレンス
 
-[導入・更新手順](../../README.md) / [検証記録](../verification/readme.md)
+[README（導入の表と、このリポジトリの運用）](../../README.md) / [検証記録](../verification/readme.md) / ロールバック: [Windows 11 の設定](../extra/readme.md) / [Excel の差分表示の注意点](../extra/excel-diff.md)
 
 `main` ブランチ(lazygit 公式のデフォルト設定)の `config.yml` を丸ごとベースにし、変更した項目にだけ日本語のコメントを付けてあります。
 
@@ -25,9 +25,4 @@
 - 全設定項目のリファレンスは公式ドキュメントを参照してください:
   - [Config.md](https://github.com/jesseduffield/lazygit/blob/master/docs/Config.md)(全設定項目)
 
-## ブランチ構成
-
-| ブランチ | 内容 |
-| --- | --- |
-| `custom`(デフォルト) | このブランチ。`main` の上に自分用のカスタマイズを積んだもの |
-| `main` | lazygit 公式のデフォルト設定([docs/Config.md](https://github.com/jesseduffield/lazygit/blob/master/docs/Config.md) の Default セクション)をそのまま置いた upstream 追従ブランチ。直接編集しない |
+ブランチ構成と上流への追従は、README の「[このリポジトリの運用](../../README.md#このリポジトリの運用)」にある。
