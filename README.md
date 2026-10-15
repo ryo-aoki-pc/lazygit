@@ -14,6 +14,7 @@
 | 本体とこの設定 | [lazygit](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/almalinux-setup.md#lazygit) (手順 2 で「lazygit の設定を導入する」も通す) | [lazygit](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md#lazygit) (手順 5 で「lazygit の設定を導入する」も通す) |
 | この設定だけ (本体が入っているとき) | [lazygit の設定を導入する](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/almalinux-setup.md#lazygit-の設定を導入する) | [lazygit の設定を導入する](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md#lazygit-の設定を導入する) |
 | Excel の差分表示（任意） | [lazygit の Excel 差分表示を導入する](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/almalinux-setup.md#lazygit-の-excel-差分表示を導入する) | [lazygit の Excel 差分表示を導入する](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md#lazygit-の-excel-差分表示を導入する) |
+| この設定の更新 | [lazygit の設定を更新する](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/almalinux-setup.md#lazygit-の設定を更新する) | [lazygit の設定を更新する](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md#lazygit-の設定を更新する) |
 | 本体の更新 | [共通の bash 設定・Homebrew・Flatpak を上げる](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/almalinux-setup.md#共通の-bash-設定homebrewflatpak-を上げる)の手順 2・3 | [scoop・winget・WSL を上げる](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md#scoopwingetwsl-を上げる)の手順 2・3 |
 | 戻す | [Git の道具を消す](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/extra/almalinux-setup.md#git-の道具を消す)の手順 1 (この設定の clone とリンクの消し方は、その箇条書き) | [Git の道具を消す](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/extra/windows-setup.md#git-の道具を消す)の手順 1・2 (この設定だけ戻すなら [Windows 11 のロールバック](docs/extra/readme.md#windows-11-のロールバック)) |
 
@@ -131,7 +132,7 @@ Excel のブックの差分をセルのテキストで出し、セルの変更�
 - 公式デフォルトからのカスタマイズ差分は `git diff main custom -- config.yml`(コミット単位なら `git log --oneline main..custom`)で確認できます。
 - `custom` の `config.yml` は `main` の全項目形式を保ち、変えたい値だけを書き換えます(項目の削除・並べ替え・独自ヘッダの追加はしない)。版の互換性に必要なキーの改名・移動は[検証記録](docs/verification/readme.md)に残します。変更した値の直上に日本語コメントを 1 行付けます。
 - upstream(lazygit の新バージョン)への追従は、`main` で [`scripts/fetch-upstream-config.sh`](scripts/fetch-upstream-config.sh) を実行してコミットし、
-  `custom` を `git rebase main` で載せ直します(手順の詳細は `main` ブランチの README を参照)。
+  `custom` を `git rebase main` で載せ直します(手順の詳細は `main` ブランチの README を参照)。`main` を push し、載せ直した `custom` は `git push --force-with-lease origin custom` で上げます。ほかのマシンの clone は、[導入](#導入)の表の「この設定の更新」で合わせます。
 
 ## 文書
 
