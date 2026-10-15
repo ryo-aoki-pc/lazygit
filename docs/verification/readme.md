@@ -6,10 +6,10 @@ lazygit 0.66.0 の公式 JSON スキーマ([schema/config.json](https://github.c
 
 ## delta の表示の切り替えを既定にする（2026-10-09）
 
-`config.yml` の `git.diffRenderers` を、標準(`delta side-by-side`)→ 速度優先 → 見やすさ優先 → 内蔵表示の 4 項目にした。速度優先と見やすさ優先は、これまで README の「Windows で使う場合」にあった二重引用符の形をそのまま使い、Linux と Windows で同じ設定にした。README の[設定手順](https://github.com/ryo-aoki-pc/lazygit/blob/1ff98e242cd03a363200d9749b95ebbb52b1503d/README.md#設定手順)の例は、この `config.yml` と同じ内容にした。
+`config.yml` の `git.diffRenderers` を、標準(`delta side-by-side`)→ 速度優先 → 見やすさ優先 → 内蔵表示の 4 項目にした。速度優先と見やすさ優先は二重引用符の形を使い、Linux と Windows で同じ設定にした。README の[設定手順](https://github.com/ryo-aoki-pc/lazygit/blob/1ff98e242cd03a363200d9749b95ebbb52b1503d/README.md#設定手順)の例は、この `config.yml` と同じ内容にした。
 
 - 環境: Ubuntu 24.04.5 のコンテナ(x86_64)、Git 2.43.0、lazygit 0.66.0・delta 0.20.1(公式のリリースのバイナリ)、tmux 3.4、PyYAML 6.0.1
-- 設定の一致: `config.yml` と README の設定手順の YAML を PyYAML で読み、`git.diffRenderers` の 4 項目が一致することを確かめた。標準の項目は変更前の `config.yml` と、速度優先・見やすさ優先・内蔵表示の 3 項目は変更前の README の「Windows で使う場合」の例と一致した
+- 設定の一致: `config.yml` と README の設定手順の YAML を PyYAML で読み、`git.diffRenderers` の 4 項目が一致することを確かめた。標準の項目は変更前の `config.yml` と一致した
 - 引用符: 日本語・タブ・約 900 文字の行・途中への行追加を含む差分で、3 つの delta のコマンドを変更前の単一引用符の形と新しい二重引用符の形で `/bin/bash -c` に通した(標準と見やすさ優先は `git diff --color=always`、速度優先は `--color=never` の出力を入力にした)。3 つとも出力はバイト単位で一致し、標準エラー出力は空だった
 - lazygit での切り替え: 同じ差分のリポジトリで `lazygit --use-config-file config.yml` を tmux の 400 列×50 行の窓で起動し、`tmux capture-pane` で画面を読んだ(`NO_COLOR` は外し、`XDG_CONFIG_HOME`・`XDG_STATE_HOME` は一時フォルダーに向けた)。起動時は標準で、コマンドログに `/bin/bash -c "delta … --side-by-side"` が出た。`|` を押すたびに、速度優先(行番号の無い `+/-` 付きの左右比較。コマンドログに二重引用符を含むコマンド)→ 見やすさ優先(行番号と Monokai Extended の色)→ 内蔵表示 → 標準と切り替わり、エラーや `bat warning` は出なかった。`q` での終了コードは 0 だった
 - 自動テスト: `python3 -m unittest discover tests` の 59 件が通った(Excel の部分ステージの専用画面は、これまでどおり標準と内蔵表示の 2 項目の設定で起動する)

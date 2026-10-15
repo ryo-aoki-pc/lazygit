@@ -141,4 +141,3 @@ Excel のブックの差分をセルのテキストで出し、セルの変更�
 - [Windows 11 の設定のロールバック](docs/extra/readme.md)
 - [検証記録](docs/verification/readme.md)
 - テストのコマンドと、変更するときの決まりは [AGENTS.md](AGENTS.md)
-- 旧手順書の移動先: setup-notes の[集約対応表](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/dev/consolidation-map.md)
