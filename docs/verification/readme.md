@@ -6,7 +6,7 @@ lazygit 0.66.0 の公式 JSON スキーマ([schema/config.json](https://github.c
 
 ## delta の表示の切り替えを既定にする（2026-10-09）
 
-`config.yml` の `git.diffRenderers` を、標準(`delta side-by-side`)→ 速度優先 → 見やすさ優先 → 内蔵表示の 4 項目にした。速度優先と見やすさ優先は、これまで README の「Windows で使う場合」にあった二重引用符の形をそのまま使い、Linux と Windows で同じ設定にした。README の[設定手順](../../README.md#設定手順)の例は、この `config.yml` と同じ内容にした。
+`config.yml` の `git.diffRenderers` を、標準(`delta side-by-side`)→ 速度優先 → 見やすさ優先 → 内蔵表示の 4 項目にした。速度優先と見やすさ優先は、これまで README の「Windows で使う場合」にあった二重引用符の形をそのまま使い、Linux と Windows で同じ設定にした。README の[設定手順](https://github.com/ryo-aoki-pc/lazygit/blob/1ff98e242cd03a363200d9749b95ebbb52b1503d/README.md#設定手順)の例は、この `config.yml` と同じ内容にした。
 
 - 環境: Ubuntu 24.04.5 のコンテナ(x86_64)、Git 2.43.0、lazygit 0.66.0・delta 0.20.1(公式のリリースのバイナリ)、tmux 3.4、PyYAML 6.0.1
 - 設定の一致: `config.yml` と README の設定手順の YAML を PyYAML で読み、`git.diffRenderers` の 4 項目が一致することを確かめた。標準の項目は変更前の `config.yml` と、速度優先・見やすさ優先・内蔵表示の 3 項目は変更前の README の「Windows で使う場合」の例と一致した
@@ -73,7 +73,7 @@ lazygit 0.66.0 の公式 JSON スキーマ([schema/config.json](https://github.c
 
 ## Excel の部分ステージ（2026-10-08）
 
-[専用画面の操作](../excel-diff.md#excel-の部分ステージ)と Excel の再構成処理を AlmaLinux 10.2 (aarch64) で確認した。Git 2.52.0、Python 3.14.8、lazygit 0.66.0、delta 0.20.1、openpyxl 3.1.5、xlrd 2.0.2、lxml 6.1.3 を使った。
+[専用画面の操作](https://github.com/ryo-aoki-pc/lazygit/blob/1ff98e242cd03a363200d9749b95ebbb52b1503d/docs/excel-diff.md#excel-の部分ステージ)と Excel の再構成処理を AlmaLinux 10.2 (aarch64) で確認した。Git 2.52.0、Python 3.14.8、lazygit 0.66.0、delta 0.20.1、openpyxl 3.1.5、xlrd 2.0.2、lxml 6.1.3 を使った。
 
 - 導入した仮想環境で `python -B -m unittest discover -s tests -v` を実行し、56 テストが成功した。既存の textconv 16 件に、Git 連携 23 件、OOXML 編集 10 件、セットアップ 7 件を追加した
 - Git 連携では既存ステージと未選択セルの保持、別ファイルの並行ステージ、対象 Excel の並行変更拒否、別インデックスと linked worktree、特殊なファイル名、Git alias のサブディレクトリ実行、不完全なセル置換とキャンセルを確認した
@@ -83,11 +83,11 @@ lazygit 0.66.0 の公式 JSON スキーマ([schema/config.json](https://github.c
 - 初回の実 TUI では日本語シート名のハンク選択が無言で反映されなかった。delta の OSC1717 のファイル名が八進エスケープされたままで、lazygit の実ファイル名と一致しなかった。一時リポジトリだけ `core.quotePath=false` にして解消し、日本語と空白を含むシート名の回帰テストを追加した
 - 通常の導入先にもセットアップを実行し、読み取り専用の `--check` が成功した。セットアップの再実行、既存 attributes の保持、設置スクリプトと alias の検証は隔離したテストでも確認した
 
-この節の時点では、部分ステージ処理は Windows / macOS の実機では未検証だった(Windows は上の節で確認した)。新規ファイル、旧形式、シート構成変更、共有・配列数式などの制限は[操作手順](../excel-diff.md#excel-の部分ステージ)に記載した。
+この節の時点では、部分ステージ処理は Windows / macOS の実機では未検証だった(Windows は上の節で確認した)。新規ファイル、旧形式、シート構成変更、共有・配列数式などの制限は[操作手順](https://github.com/ryo-aoki-pc/lazygit/blob/1ff98e242cd03a363200d9749b95ebbb52b1503d/docs/excel-diff.md#excel-の部分ステージ)に記載した。
 
 ## Windows 11 での Excel 差分の検証と大きいブックへの対応（2026-10-08）
 
-[Excel の textconv 差分表示](#excel-の-textconv-差分表示2026-10-08)を Windows 11 の実機で確かめ、見つかった待ち時間の問題に対応した([大きいブックの表示](../excel-diff.md#大きいブックの表示))。
+[Excel の textconv 差分表示](#excel-の-textconv-差分表示2026-10-08)を Windows 11 の実機で確かめ、見つかった待ち時間の問題に対応した([大きいブックの表示](https://github.com/ryo-aoki-pc/lazygit/blob/1ff98e242cd03a363200d9749b95ebbb52b1503d/docs/excel-diff.md#大きいブックの表示))。
 
 - 環境: Windows 11 Pro(ビルド 26300)、AMD Ryzen AI MAX+ 395(32 スレッド)、Git 2.55.0.windows.5、Python 3.14.8(scoop)、openpyxl 3.1.5、xlrd 2.0.2、lazygit 0.66.0・delta 0.20.1(scoop)。Linux 側の確認には同じ PC の WSL の AlmaLinux 10(Python 3.12.13、Git 2.52.0)を使った
 - 方法: `HOME`・`USERPROFILE`・`LOCALAPPDATA` を一時フォルダーに向けて導入し、実際のグローバル Git 設定は変更していない。lazygit は ConPTY の 140列×40行で起動して pyte で画面を読み取り、`CONFIG_DIR` に同梱 `config.yml` の写しを置いた。`NO_COLOR` は外した
@@ -261,7 +261,7 @@ snacks.nvim の lazygit と同じく、`LG_CONFIG_FILE` の最後に `os.editPre
 
 ### delta の設定例の引用符
 
-- [README の設定例](../../README.md#設定手順)の 2 つのコマンドを、単一引用符の形と二重引用符の形で、Linux の lazygit と同じ `/bin/bash -c` に通して比べた(`git -c color.diff=always diff | /bin/bash -c '<コマンド>'`)。速度優先・見やすさ優先とも、出力はバイト単位で一致した
+- [README の設定例](https://github.com/ryo-aoki-pc/lazygit/blob/1ff98e242cd03a363200d9749b95ebbb52b1503d/README.md#設定手順)の 2 つのコマンドを、単一引用符の形と二重引用符の形で、Linux の lazygit と同じ `/bin/bash -c` に通して比べた(`git -c color.diff=always diff | /bin/bash -c '<コマンド>'`)。速度優先・見やすさ優先とも、出力はバイト単位で一致した
 - 二重引用符の形を設定ファイルに書いて lazygit を起動した。コマンドログに `/bin/bash -c "delta … --word-diff-regex="(?s).+" … --line-numbers-right-format="│ " --wrap-max-lines=0"` と出て、`|` で速度優先 → 見やすさ優先 → 内蔵表示 → 速度優先と切り替わり、エラーは出なかった
 - Windows で `cmd /s /c "<コマンド>"` で実行することは、lazygit 0.66.0 の [cmd_obj_builder.go](https://github.com/jesseduffield/lazygit/blob/v0.66.0/pkg/commands/oscommands/cmd_obj_builder.go)(`newWindowsShell`)と [os_windows.go](https://github.com/jesseduffield/lazygit/blob/v0.66.0/pkg/commands/oscommands/os_windows.go) を読んだもの
 
@@ -294,7 +294,7 @@ snacks.nvim の lazygit と同じく、`LG_CONFIG_FILE` の最後に `os.editPre
 
 ## 新規 AlmaLinux VM での検証（2026-10-06）
 
-- AlmaLinux 10.2 Workstation の x86_64 新規 VM へ Homebrew 7.0.8 / lazygit 0.66.0 を入れ、[導入手順](../../README.md#導入方法)の公開 URL から `dc3873e` を clone して `~/.config/lazygit/config.yml` のリンクを作った。SSH の対話 PTY で試験用 git リポジトリを開き、変更行数・ファイルツリー・差分の表示と `q` の終了を確認した
+- AlmaLinux 10.2 Workstation の x86_64 新規 VM へ Homebrew 7.0.8 / lazygit 0.66.0 を入れ、[導入手順](https://github.com/ryo-aoki-pc/lazygit/blob/1ff98e242cd03a363200d9749b95ebbb52b1503d/README.md#導入方法)の公開 URL から `dc3873e` を clone して `~/.config/lazygit/config.yml` のリンクを作った。SSH の対話 PTY で試験用 git リポジトリを開き、変更行数・ファイルツリー・差分の表示と `q` の終了を確認した
 - 初回起動は 4 キーを自動移行し、リンク先の `config.yml` を書き換えた。新規 clone に不要な変更が残らないよう、設定の値とコメントを保持して次の互換修正を適用した
   - `gui.wrapLinesInStagingView` → `gui.wrapLinesInDiffView`
   - `gui.useHunkModeInStagingView` → `gui.useHunkModeInDiffView`
