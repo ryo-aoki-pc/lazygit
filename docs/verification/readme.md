@@ -6,10 +6,10 @@ lazygit 0.66.0 の公式 JSON スキーマ([schema/config.json](https://github.c
 
 ## delta の表示の切り替えを既定にする（2026-10-09）
 
-`config.yml` の `git.diffRenderers` を、標準(`delta side-by-side`)→ 速度優先 → 見やすさ優先 → 内蔵表示の 4 項目にした。速度優先と見やすさ優先は、これまで README の「Windows で使う場合」にあった二重引用符の形をそのまま使い、Linux と Windows で同じ設定にした。README の[設定手順](https://github.com/ryo-aoki-pc/lazygit/blob/1ff98e242cd03a363200d9749b95ebbb52b1503d/README.md#設定手順)の例は、この `config.yml` と同じ内容にした。
+`config.yml` の `git.diffRenderers` を、標準(`delta side-by-side`)→ 速度優先 → 見やすさ優先 → 内蔵表示の 4 項目にした。速度優先と見やすさ優先は二重引用符の形を使い、Linux と Windows で同じ設定にした。README の[設定手順](https://github.com/ryo-aoki-pc/lazygit/blob/1ff98e242cd03a363200d9749b95ebbb52b1503d/README.md#設定手順)の例は、この `config.yml` と同じ内容にした。
 
 - 環境: Ubuntu 24.04.5 のコンテナ(x86_64)、Git 2.43.0、lazygit 0.66.0・delta 0.20.1(公式のリリースのバイナリ)、tmux 3.4、PyYAML 6.0.1
-- 設定の一致: `config.yml` と README の設定手順の YAML を PyYAML で読み、`git.diffRenderers` の 4 項目が一致することを確かめた。標準の項目は変更前の `config.yml` と、速度優先・見やすさ優先・内蔵表示の 3 項目は変更前の README の「Windows で使う場合」の例と一致した
+- 設定の一致: `config.yml` と README の設定手順の YAML を PyYAML で読み、`git.diffRenderers` の 4 項目が一致することを確かめた。標準の項目は変更前の `config.yml` と一致した
 - 引用符: 日本語・タブ・約 900 文字の行・途中への行追加を含む差分で、3 つの delta のコマンドを変更前の単一引用符の形と新しい二重引用符の形で `/bin/bash -c` に通した(標準と見やすさ優先は `git diff --color=always`、速度優先は `--color=never` の出力を入力にした)。3 つとも出力はバイト単位で一致し、標準エラー出力は空だった
 - lazygit での切り替え: 同じ差分のリポジトリで `lazygit --use-config-file config.yml` を tmux の 400 列×50 行の窓で起動し、`tmux capture-pane` で画面を読んだ(`NO_COLOR` は外し、`XDG_CONFIG_HOME`・`XDG_STATE_HOME` は一時フォルダーに向けた)。起動時は標準で、コマンドログに `/bin/bash -c "delta … --side-by-side"` が出た。`|` を押すたびに、速度優先(行番号の無い `+/-` 付きの左右比較。コマンドログに二重引用符を含むコマンド)→ 見やすさ優先(行番号と Monokai Extended の色)→ 内蔵表示 → 標準と切り替わり、エラーや `bat warning` は出なかった。`q` での終了コードは 0 だった
 - 自動テスト: `python3 -m unittest discover tests` の 59 件が通った(Excel の部分ステージの専用画面は、これまでどおり標準と内蔵表示の 2 項目の設定で起動する)
@@ -83,7 +83,7 @@ lazygit 0.66.0 の公式 JSON スキーマ([schema/config.json](https://github.c
 - 初回の実 TUI では日本語シート名のハンク選択が無言で反映されなかった。delta の OSC1717 のファイル名が八進エスケープされたままで、lazygit の実ファイル名と一致しなかった。一時リポジトリだけ `core.quotePath=false` にして解消し、日本語と空白を含むシート名の回帰テストを追加した
 - 通常の導入先にもセットアップを実行し、読み取り専用の `--check` が成功した。セットアップの再実行、既存 attributes の保持、設置スクリプトと alias の検証は隔離したテストでも確認した
 
-この節の時点では、部分ステージ処理は Windows / macOS の実機では未検証だった(Windows は上の節で確認した)。新規ファイル、旧形式、シート構成変更、共有・配列数式などの制限は[操作手順](https://github.com/ryo-aoki-pc/lazygit/blob/1ff98e242cd03a363200d9749b95ebbb52b1503d/docs/excel-diff.md#excel-の部分ステージ)に記載した。
+この節の時点では、部分ステージ処理は macOS の実機では未検証だった。新規ファイル、旧形式、シート構成変更、共有・配列数式などの制限は[操作手順](https://github.com/ryo-aoki-pc/lazygit/blob/1ff98e242cd03a363200d9749b95ebbb52b1503d/docs/excel-diff.md#excel-の部分ステージ)に記載した。
 
 ## Windows 11 での Excel 差分の検証と大きいブックへの対応（2026-10-08）
 
@@ -134,7 +134,7 @@ lazygit でファイルを選んでから、差分の欄に変更したセルが
 
 ## Excel の textconv 差分表示（2026-10-08）
 
-[導入手順](../excel-diff.md)に対応する追加の検証。Debian 13.6 のコンテナで、Git 2.52.0、Python 3.12.14、openpyxl 3.1.5、xlrd 2.0.1 / 2.0.2、lazygit 0.66.0、delta 0.20.1 を使った。lazygit / delta の検証用バイナリは公式リリースのチェックサムと一致した。この節は大きいブックへの対応の前の版での確認で、Windows / macOS の実機では未検証だった(Windows は上の節で確認した)。
+[導入手順](../excel-diff.md)に対応する追加の検証。Debian 13.6 のコンテナで、Git 2.52.0、Python 3.12.14、openpyxl 3.1.5、xlrd 2.0.1 / 2.0.2、lazygit 0.66.0、delta 0.20.1 を使った。lazygit / delta の検証用バイナリは公式リリースのチェックサムと一致した。この節は大きいブックへの対応の前の版での確認で、macOS の実機では未検証だった。
 
 - [`tests/test_excel_textconv.py`](../../tests/test_excel_textconv.py) の 10 テストが成功。複数シート、日本語・空白を含むパス、拡張子の無い Git 一時ファイル、数式、日付・時刻・真偽値・エラー、セル内改行・タブ、書式だけの変更、不正なシート dimension と破損ファイルを確認した。実際の Git リポジトリで staged / unstaged / 追加 / 削除 / 未追跡の差分も確認した
 - lazygit の実 TUI を PTY と pyte で読み取り、同梱 `config.yml` の delta と `|` で切り替える内蔵表示の両方で、変更・ステージ済み・追加・削除・未追跡・コミットの Excel 差分が出ることを確認した。`.xls` も複数シートのセル値を表示した
@@ -281,14 +281,12 @@ snacks.nvim の lazygit と同じく、`LG_CONFIG_FILE` の最後に `os.editPre
 
 ### Windows で未検証の項目
 
-このうち、Windows での `e`(Neovim)、引用符と `│` の受け渡し、`config.yml` の delta の行の表示、状態ファイルの置き場所は、同じ日に[実機で確かめた](#windows-で確かめたこと)。
+Windows での `e`(Neovim)、引用符と `│` の受け渡し、`config.yml` の delta の行の表示、状態ファイルの置き場所は、同じ日に[実機で確かめた](#windows-で確かめたこと)。
 
 - Windows PowerShell 5.1 への導入方法のブロックの貼り付けと実行(`Move-Item`、`git clone`、`lazygit --print-config-dir` が `C:\Users\<ユーザー名>\AppData\Local\lazygit` を出すこと)
 - Windows PowerShell 5.1 での元に戻すブロック 2 つの実行(`Remove-Item -Recurse -Force` で clone の読み取り専用のファイルも消えること)
-- Windows の lazygit が `state.yml`・`github_pull_requests.json`・`development.log`(`--debug` のとき)を `%LOCALAPPDATA%\lazygit` に作ること(lazygit 0.66.0 と adrg/xdg 0.5.3 のソースでは、Windows の状態の置き場所の既定は `%LOCALAPPDATA%`)
-- Windows での `e`(`editInTerminal: true` で、cmd.exe から起動した Vim / Neovim が端末を受け取り、終了後に lazygit に戻ること)
-- `cmd /s /c` での delta の設定例の引用符(単一引用符の形が失敗し、二重引用符の形が動くこと)と、`│` などの ASCII 以外の引数の受け渡し
-- リポジトリの `config.yml` の delta の行の、Windows での表示
+- Windows の lazygit が `development.log`(`--debug` のとき)を `%LOCALAPPDATA%\lazygit` に作ること(lazygit 0.66.0 と adrg/xdg 0.5.3 のソースでは、Windows の状態の置き場所の既定は `%LOCALAPPDATA%`)
+- Windows での `e`(`editInTerminal: true` で、cmd.exe から起動した Vim が端末を受け取り、終了後に lazygit に戻ること)
 - `VCRUNTIME140.dll` が無い PC で `delta.exe` が起動しないことと、Visual C++ 再頒布可能パッケージを入れた後の起動(`winget install --exact --id Microsoft.VCRedist.2015+.x64` の実行と管理者の承認を含む)
 - Windows の Neovim の中から開いた lazygit の `e`(`nvim-remote` のテンプレートは POSIX sh の構文で、Windows では cmd.exe で動かすため、動かない可能性が高い。[lazygit の issue #3467](https://github.com/jesseduffield/lazygit/issues/3467))
 
