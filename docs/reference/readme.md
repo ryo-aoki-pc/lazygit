@@ -1,6 +1,6 @@
 # lazygit 設定リファレンス
 
-[README（導入の表と、このリポジトリの運用）](../../README.md) / [検証記録](../verification/readme.md)
+[README（導入の表と、このリポジトリの運用）](../../README.md) / [検証記録](../verification/readme.md) / ロールバック: [Windows 11 の設定](../extra/readme.md) / [Excel の差分表示の注意点](../extra/excel-diff.md)
 
 `main` ブランチ(lazygit 公式のデフォルト設定)の `config.yml` を丸ごとベースにし、変更した項目にだけ日本語のコメントを付けてあります。
 

@@ -11,11 +11,11 @@
 | --- | --- | --- |
 | フォント（Nerd Fonts） | [HackGen Console NF](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/shell-terminal.md#hackgen-console-nf) | [Windows 11 で HackGen Console NF を入れる](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/shell-terminal.md#windows-11-で-hackgen-console-nf-を入れる) |
 | 差分の表示に使う git-delta | [git-delta](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/almalinux-setup.md#git-delta) | [git-delta](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md#git-delta) |
-| 本体 | [lazygit](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/almalinux-setup.md#lazygit) | [lazygit](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md#lazygit) |
-| この設定 | [lazygit の設定を導入する](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/almalinux-setup.md#lazygit-の設定を導入する) | [lazygit の設定を導入する](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md#lazygit-の設定を導入する) |
+| 本体とこの設定 | [lazygit](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/almalinux-setup.md#lazygit) (手順 2 で「lazygit の設定を導入する」も通す) | [lazygit](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md#lazygit) (手順 5 で「lazygit の設定を導入する」も通す) |
+| この設定だけ (本体が入っているとき) | [lazygit の設定を導入する](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/almalinux-setup.md#lazygit-の設定を導入する) | [lazygit の設定を導入する](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md#lazygit-の設定を導入する) |
 | Excel の差分表示（任意） | [lazygit の Excel 差分表示を導入する](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/almalinux-setup.md#lazygit-の-excel-差分表示を導入する) | [lazygit の Excel 差分表示を導入する](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md#lazygit-の-excel-差分表示を導入する) |
-| 本体の更新 | [共通の bash 設定・Homebrew・Flatpak を上げる](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/almalinux-setup.md#共通の-bash-設定homebrewflatpak-を上げる) | [scoop・winget・WSL を上げる](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md#scoopwingetwsl-を上げる) |
-| 戻す | [Git の道具を消す](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/extra/almalinux-setup.md#git-の道具を消す)の手順 1 | [Git の道具を消す](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/extra/windows-setup.md#git-の道具を消す)の手順 1・2（設定だけ戻すなら[設定のロールバック](docs/extra/readme.md#windows-11-のロールバック)） |
+| 本体の更新 | [共通の bash 設定・Homebrew・Flatpak を上げる](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/almalinux-setup.md#共通の-bash-設定homebrewflatpak-を上げる)の手順 2・3 | [scoop・winget・WSL を上げる](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md#scoopwingetwsl-を上げる)の手順 2・3 |
+| 戻す | [Git の道具を消す](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/extra/almalinux-setup.md#git-の道具を消す)の手順 1 (この設定の clone とリンクの消し方は、その箇条書き) | [Git の道具を消す](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/extra/windows-setup.md#git-の道具を消す)の手順 1・2 (この設定だけ戻すなら [Windows 11 のロールバック](docs/extra/readme.md#windows-11-のロールバック)) |
 
 - この設定は、Nerd Fonts（v3 系）と git-delta を前提にしている。入れないときは、次の設定を外す
 
