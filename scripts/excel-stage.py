@@ -3,6 +3,8 @@
 
 import argparse
 import hashlib
+import io
+from itertools import zip_longest
 import json
 import os
 from pathlib import Path
@@ -118,23 +120,46 @@ def prepare_session(repo, relative, directory, progress=None):
                "commit.gpgSign": "false", "tag.gpgSign": "false"}
     for key, value in options.items():
         git(picker, "config", key, value, env=picker_env)
+    baseline_directory = directory / "baseline"
+    baseline_directory.mkdir()
     sheets = []
     for number, sheet in enumerate(base.sheets, 1):
         safe_name = re.sub(r'[<>:"/\\|?*\x00-\x1f]', "_", sheet.name).strip(" .") or "Sheet"
         filename = "{:03d}-{}.cells.txt".format(number, safe_name)
-        sheets.append({"id": sheet.id, "name": sheet.name, "filename": filename})
-        with (picker / filename).open("w", encoding="utf-8", newline="\n") as output:
-            output.write(baseline[sheet.id])
+        baseline_data = baseline[sheet.id].encode("utf-8")
+        sheets.append({"id": sheet.id, "name": sheet.name, "filename": filename,
+                       "baseline_sha256": hashlib.sha256(baseline_data).hexdigest()})
+        # Keep the trusted original projection outside the editable picker repo.
+        (baseline_directory / filename).write_bytes(baseline_data)
+        (picker / filename).write_bytes(baseline_data)
     git(picker, "add", "--all", env=picker_env)
     git(picker, "commit", "--quiet", "--no-verify", "-m", "現在の Excel インデックス", env=picker_env)
     for sheet in sheets:
         with (picker / sheet["filename"]).open("w", encoding="utf-8", newline="\n") as output:
             output.write(changed[sheet["id"]])
     state = {"repo": str(repo), "path": relative, "index": str(index), "mode": mode,
-             "oid": oid, "work_sha256": hashlib.sha256(work_data).hexdigest(),
+             "oid": oid, "base_sha256": hashlib.sha256(base_data).hexdigest(),
+             "work_sha256": hashlib.sha256(work_data).hexdigest(),
              "sheets": sheets, "applied": False}
     write_json(directory / "session.json", state)
     return state
+
+
+def _record_lines(data):
+    """Yield splitlines-compatible records without a list of every cell line."""
+    with io.TextIOWrapper(io.BytesIO(data), encoding="utf-8", newline="") as source:
+        pending = ""
+        while True:
+            chunk = source.read(65536)
+            if not chunk:
+                yield from pending.splitlines()
+                return
+            lines = (pending + chunk).splitlines(keepends=True)
+            # Retain the last line even when terminated: a CR at the chunk
+            # boundary may be the first half of CRLF in the next chunk.
+            pending = lines.pop() if lines else ""
+            for line in lines:
+                yield line[:-2] if line.endswith("\r\n") else line[:-1]
 
 
 def selected_cells(directory, state, base, work):
@@ -143,16 +168,33 @@ def selected_cells(directory, state, base, work):
     names = {sheet["filename"] for sheet in state["sheets"]}
     if {row[0] for row in rows} != names or any(row[1] != "100644" or row[3] != "0" for row in rows):
         raise StageError("選択画面のファイルが削除・追加・競合しています。セルのハンクだけを選んでください。")
+    base.assert_compatible(work)
     selected = set()
-    baseline = base.projection(work)
+    missing = object()
     for sheet in state["sheets"]:
         sheet_id = sheet["id"]
-        expected = [parse_record(line)[0] for line in baseline[sheet_id].splitlines()]
-        text = git(picker, "show", ":" + sheet["filename"], env=env).stdout.decode("utf-8")
-        records = [parse_record(line) for line in text.splitlines()]
-        if [coord for coord, _ in records] != expected:
-            raise StageError(sheet["name"] + " のセル置換が不完全です。削除行と追加行を一緒に選んでください。")
-        for coordinate, cell in records:
+        if "baseline_sha256" not in sheet:
+            raise StageError("選択画面の形式が更新されています。画面を閉じて選び直してください。")
+        baseline = (directory / "baseline" / sheet["filename"]).read_bytes()
+        if hashlib.sha256(baseline).hexdigest() != sheet["baseline_sha256"]:
+            raise StageError("選択開始時の射影が変更されています。画面を閉じて選び直してください。")
+        # splitlines historically treats these unescaped JSON string
+        # characters as record boundaries. Preserve its rejection of such
+        # projections instead of accepting split fragments without parsing.
+        validate_all = any(separator in baseline for separator in (b"\xc2\x85", b"\xe2\x80\xa8", b"\xe2\x80\xa9"))
+        text = git(picker, "show", ":" + sheet["filename"], env=env).stdout
+        for before_line, selected_line in zip_longest(_record_lines(baseline), _record_lines(text), fillvalue=missing):
+            if before_line is missing or selected_line is missing:
+                raise StageError(sheet["name"] + " のセル置換が不完全です。削除行と追加行を一緒に選んでください。")
+            # The captured projection already describes the validated base.
+            # Most lines are identical, including when a large book has only
+            # a handful of edits; only replacements need JSON validation.
+            if before_line == selected_line and not validate_all:
+                continue
+            expected, _ = parse_record(before_line)
+            coordinate, cell = parse_record(selected_line)
+            if coordinate != expected:
+                raise StageError(sheet["name"] + " のセル置換が不完全です。削除行と追加行を一緒に選んでください。")
             key = sheet_id, coordinate
             before, after = base.cells.get(key), work.cells.get(key)
             if cell != before and cell != after:
@@ -175,8 +217,14 @@ def apply_session(directory):
     state = json.loads(state_path.read_text(encoding="utf-8"))
     if state["applied"]:
         raise StageError("この選択は反映済みです。q で戻り、E で新しく開いてください。")
-    base = Workbook((directory / "base.xlsx").read_bytes())
-    work = Workbook((directory / "work.xlsx").read_bytes())
+    if "base_sha256" not in state:
+        raise StageError("選択画面の形式が更新されています。画面を閉じて選び直してください。")
+    base_data = (directory / "base.xlsx").read_bytes()
+    work_data = (directory / "work.xlsx").read_bytes()
+    if (hashlib.sha256(base_data).hexdigest() != state["base_sha256"] or
+            hashlib.sha256(work_data).hexdigest() != state["work_sha256"]):
+        raise StageError("選択開始時の Excel が変更されています。画面を閉じて選び直してください。")
+    base, work = Workbook(base_data), Workbook(work_data)
     selected = selected_cells(directory, state, base, work)
     if not selected:
         return 0

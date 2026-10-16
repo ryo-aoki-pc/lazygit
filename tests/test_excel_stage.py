@@ -439,6 +439,124 @@ class ExcelStageTests(unittest.TestCase):
         self.git("add", "--", sheet["filename"], cwd=picker)
         self.assert_rejected_without_index_change(lambda: self.stage.apply_session(session))
 
+    def test_apply_uses_saved_projection_and_only_parses_changed_records(self):
+        self.edit({("売上", "A1"): "選ぶ", ("売上", "B1"): 25})
+        session, state = self.prepare()
+        for sheet in state["sheets"]:
+            baseline = session / "baseline" / sheet["filename"]
+            self.assertEqual(baseline.read_bytes(), self.git(
+                "show", "HEAD:" + sheet["filename"], cwd=session / "picker"
+            ))
+        self.assertEqual(set(self.git("ls-files", cwd=session / "picker").decode().splitlines()),
+                         {sheet["filename"] for sheet in state["sheets"]})
+        self.select(session, state, {("売上", "A1")})
+        with mock.patch.object(self.stage.Workbook, "projection", side_effect=AssertionError("projection recomputed")), mock.patch.object(
+            self.stage, "parse_record", wraps=self.stage.parse_record
+        ) as parse:
+            self.assertEqual(self.stage.apply_session(session), 1)
+        self.assertEqual(parse.call_count, 2, "only the baseline and selected version of one replacement need parsing")
+        self.assertEqual(self.staged_values()["売上"]["B1"].value, 10)
+
+    def test_modified_saved_projection_is_rejected(self):
+        self.edit({("売上", "A1"): "選ぶ"})
+        session, state = self.prepare()
+        self.select(session, state, {("売上", "A1")})
+        sheet = state["sheets"][0]
+        (session / "baseline" / sheet["filename"]).write_bytes(
+            self.git("show", ":" + sheet["filename"], cwd=session / "picker")
+        )
+        self.assert_rejected_without_index_change(lambda: self.stage.apply_session(session))
+
+    def test_legacy_session_requests_reopening_instead_of_a_key_error(self):
+        self.edit({("売上", "A1"): "変更後"})
+        session, state = self.prepare()
+        state.pop("base_sha256")
+        for sheet in state["sheets"]:
+            sheet.pop("baseline_sha256")
+        self.stage.write_json(session / "session.json", state)
+        with self.assertRaisesRegex(self.stage.StageError, "画面を閉じて選び直してください"):
+            self.stage.apply_session(session)
+        base = self.stage.Workbook((session / "base.xlsx").read_bytes())
+        work = self.stage.Workbook((session / "work.xlsx").read_bytes())
+        with self.assertRaisesRegex(self.stage.StageError, "画面を閉じて選び直してください"):
+            self.stage.selected_cells(session, state, base, work)
+
+    def test_changed_workbook_snapshots_are_rejected(self):
+        self.edit({("売上", "A1"): "選ぶ"})
+        for snapshot in ("base.xlsx", "work.xlsx"):
+            with self.subTest(snapshot=snapshot):
+                session = self.directory / snapshot
+                state = self.stage.prepare_session(self.repo, self.path.name, session)
+                self.select(session, state, {("売上", "A1")})
+                self.edit({("売上", "B1"): 999}, path=session / snapshot)
+                self.assert_rejected_without_index_change(lambda: self.stage.apply_session(session))
+
+    def test_selected_cells_checks_compatibility_without_any_selected_records(self):
+        session, state = self.prepare()
+        base = self.stage.Workbook((session / "base.xlsx").read_bytes())
+        book = load_workbook(session / "work.xlsx")
+        book["備考"].title = "別のシート名"
+        book.save(session / "work.xlsx")
+        book.close()
+        work = self.stage.Workbook((session / "work.xlsx").read_bytes())
+        with self.assertRaises(ValueError):
+            self.stage.selected_cells(session, state, base, work)
+
+    def test_same_length_reordered_or_readdressed_records_are_rejected(self):
+        self.edit({("売上", "A1"): "変更後"})
+        for malformed in ("reordered", "readdressed"):
+            with self.subTest(malformed=malformed):
+                session = self.directory / malformed
+                state = self.stage.prepare_session(self.repo, self.path.name, session)
+                sheet = next(sheet for sheet in state["sheets"] if sheet["name"] == "売上")
+                picker = session / "picker"
+                path = picker / sheet["filename"]
+                lines = self.git("show", "HEAD:" + sheet["filename"], cwd=picker).decode().splitlines()
+                if malformed == "reordered":
+                    lines[0], lines[1] = lines[1], lines[0]
+                else:
+                    record = json.loads(lines[0])
+                    record[0] = "A2"
+                    lines[0] = json.dumps(record, ensure_ascii=False)
+                path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+                self.git("add", "--", sheet["filename"], cwd=picker)
+                self.assert_rejected_without_index_change(lambda: self.stage.apply_session(session))
+
+    def test_picker_file_additions_deletions_and_conflicts_are_rejected(self):
+        self.edit({("売上", "A1"): "変更後"})
+        for malformed in ("added", "deleted", "conflict"):
+            with self.subTest(malformed=malformed):
+                session = self.directory / malformed
+                state = self.stage.prepare_session(self.repo, self.path.name, session)
+                sheet = state["sheets"][0]
+                picker = session / "picker"
+                if malformed == "added":
+                    (picker / "extra.cells.txt").write_bytes(b"[]\n")
+                    self.git("add", "--", "extra.cells.txt", cwd=picker)
+                elif malformed == "deleted":
+                    self.git("rm", "--force", "--", sheet["filename"], cwd=picker)
+                else:
+                    oid = self.git("rev-parse", "HEAD:" + sheet["filename"], cwd=picker).decode().strip()
+                    self.git("update-index", "--force-remove", "--", sheet["filename"], cwd=picker)
+                    rows = "".join("100644 {} {}\t{}\n".format(oid, stage, sheet["filename"]) for stage in (1, 2, 3))
+                    self.git("update-index", "--index-info", input=rows.encode(), cwd=picker)
+                self.assert_rejected_without_index_change(lambda: self.stage.apply_session(session))
+
+    def test_unchanged_unicode_record_separators_keep_existing_rejection(self):
+        for number, separator in enumerate(("\x85", "\u2028", "\u2029")):
+            with self.subTest(separator=repr(separator)):
+                self.edit({("備考", "B4"): "前" + separator + "後"})
+                self.git("add", "--", self.path.name)
+                session = self.directory / ("separator-" + str(number))
+                self.stage.prepare_session(self.repo, self.path.name, session)
+                self.assert_rejected_without_index_change(lambda: self.stage.apply_session(session))
+
+    def test_record_line_iterator_matches_splitlines_across_chunk_boundaries(self):
+        for text in ("", "\n", "A\nB\n", "A" * 65535 + "\r\nB\rC\n",
+                     "A" * 65535 + "\u2028B\x85C\u2029D\vE\fF\x1cG\x1dH\x1eI"):
+            with self.subTest(length=len(text)):
+                self.assertEqual(list(self.stage._record_lines(text.encode("utf-8"))), text.splitlines())
+
     def test_unsupported_and_new_files_require_whole_file_staging(self):
         for extension in (".xls", ".xlt", ".txt"):
             with self.subTest(extension=extension):
