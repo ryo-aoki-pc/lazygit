@@ -56,7 +56,6 @@ git:
 
 ### Windows で使う場合
 
-
 Windows の lazygit は、描画のコマンドを `cmd /s /c "<コマンド>"`(cmd.exe)で実行します。cmd.exe も delta.exe の引数の解釈も単一引用符 `'…'` を引用符として扱わないため、`'` が値に残ったり、空白で引数が分かれたりします。このため、上の設定は値を二重引用符 `"…"` で囲んでいます。二重引用符の形は Linux でも単一引用符の形と同じ表示になるため、OS ごとに書き換える必要はありません。オプションを書き足す場合も、値は二重引用符で囲んでください。
 
 delta 本体と VC++ ランタイムの導入・確認は [Windows 11 の git-delta](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md#git-delta)で行う。
