@@ -14,6 +14,7 @@ import stat
 import subprocess
 import sys
 import tempfile
+import time
 
 from excel_stage_ooxml import Workbook, WorkbookError, parse_record
 
@@ -304,6 +305,52 @@ def run_picker(directory):
                           env=isolated_env()).returncode
 
 
+def cleanup_session(directory, retries=20, delay=0.5):
+    """Remove a private session without changing the staging result."""
+    def remove_readonly(function, path, exc_info):
+        error = exc_info[1]
+        if isinstance(error, FileNotFoundError):
+            return
+        if not isinstance(error, PermissionError):
+            raise error
+        try:
+            attributes = os.lstat(path)
+            # Do not change permissions through a symlink or Windows junction.
+            if stat.S_ISLNK(attributes.st_mode) or (
+                getattr(attributes, "st_file_attributes", 0) & getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0)
+            ):
+                raise error
+            os.chmod(path, attributes.st_mode | stat.S_IWRITE)
+            # POSIX callbacks such as os.open require more than a path. Let
+            # the next rmtree attempt retry them after fixing permissions.
+            if function not in (os.unlink, os.remove, os.rmdir):
+                raise error
+            function(path)
+        except FileNotFoundError:
+            pass
+
+    # Windows lazygit can leave git diff/delta running after it exits. Wait
+    # briefly for their handles to close; cleanup must not undo a success.
+    reason = ""
+    for attempt in range(retries + 1):
+        try:
+            shutil.rmtree(directory, onerror=remove_readonly)
+        except FileNotFoundError:
+            return True
+        except PermissionError:
+            if attempt < retries:
+                time.sleep(delay)
+                continue
+            reason = "（ほかのプロセスが使用中）"
+        except OSError:
+            reason = ""
+        else:
+            return True
+        break
+    print("一時フォルダーを消せませんでした" + reason + "。後で消してください: " + str(directory), file=sys.stderr)
+    return False
+
+
 def main(argv=None):
     for stream in (sys.stdout, sys.stderr):
         if hasattr(stream, "reconfigure"):
@@ -324,13 +371,15 @@ def main(argv=None):
         repo = Path(git(Path.cwd(), "rev-parse", "--show-toplevel").stdout.decode().strip())
         prefix = os.environ.get("GIT_PREFIX", "")
         path = str(Path(prefix) / args.file) if prefix else args.file
-        with tempfile.TemporaryDirectory(prefix="lazygit-excel-stage-") as temporary:
-            directory = Path(temporary)
+        directory = Path(tempfile.mkdtemp(prefix="lazygit-excel-stage-"))
+        try:
             prepare_session(repo, path, directory, progress=lambda message: print(message, flush=True))
             result = run_picker(directory)
             state = json.loads((directory / "session.json").read_text(encoding="utf-8"))
             print("Excel の部分ステージを反映しました。" if state["applied"] else "選択を取り消しました。Excel のインデックスは変更していません。")
             return result
+        finally:
+            cleanup_session(directory)
     except (StageError, WorkbookError, OSError, UnicodeError, ValueError, KeyboardInterrupt) as error:
         print("Excel の部分ステージに失敗しました: " + str(error), file=sys.stderr)
         return 1
