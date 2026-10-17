@@ -1,6 +1,6 @@
 # lazygit の設定のロールバック
 
-[手順書（Windows 11）](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md#lazygit-の設定を導入する)・[検証記録](../verification/readme.md)・[参考資料](../reference/readme.md)
+[手順書（Windows 11）](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md#lazygit-の設定を導入する)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/repos/lazygit/docs/verification/readme.md)・[参考資料](../reference/readme.md)
 
 - 「この節の手順 N」はこの文書の手順を指す
 - AlmaLinux 10 の設定は、setup-notes の[Git の道具を消す](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/extra/almalinux-setup.md#git-の道具を消す)の手順 1 の箇条書きで消す（`~/lazygit-config` の clone とリンク）

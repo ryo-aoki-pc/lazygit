@@ -60,7 +60,7 @@ Windows の lazygit は、描画のコマンドを `cmd /s /c "<コマンド>"`(
 
 delta 本体と VC++ ランタイムの導入・確認は [Windows 11 の git-delta](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md#git-delta)で行う。
 
-Windows 11 の実機で、scoop の delta 0.20.1 と、標準・速度優先・見やすさ優先の各コマンド(速度優先と見やすさ優先は二重引用符の形)の表示を確認しました。単一引用符の形は表示が崩れます。結果は[検証記録](docs/verification/readme.md#windows-と-raspberry-pi-の実機での検証2026-10-08)に記載しています。4項目を切り替える今の `config.yml` は、Linux の lazygit で確認しました([検証記録](docs/verification/readme.md#delta-の表示の切り替えを既定にする2026-10-09))。
+Windows 11 の実機で、scoop の delta 0.20.1 と、標準・速度優先・見やすさ優先の各コマンド(速度優先と見やすさ優先は二重引用符の形)の表示を確認しました。単一引用符の形は表示が崩れます。結果は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/repos/lazygit/docs/verification/readme.md#windows-と-raspberry-pi-の実機での検証2026-10-08)に記載しています。4項目を切り替える今の `config.yml` は、Linux の lazygit で確認しました([検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/repos/lazygit/docs/verification/readme.md#delta-の表示の切り替えを既定にする2026-10-09))。
 
 ### 標準の設定
 
@@ -74,7 +74,7 @@ Windows 11 の実機で、scoop の delta 0.20.1 と、標準・速度優先・�
 
 `--wrap-max-lines=0` は折り返しを止め、列幅に収まらない部分を省略します。長い行の末尾を確認する場合は差分ビューを拡大するか、見やすさ優先へ切り替えてください。
 
-全文処理時間の比較と測定条件は[検証記録](docs/verification/readme.md#delta-の表示と性能の検証)を参照してください。Windows では git と delta の起動に時間がかかるため、小さな差分でも lazygit での表示に 0.4 秒前後かかります([Windows と Raspberry Pi の測定](docs/verification/readme.md#表示の速さ))。
+全文処理時間の比較と測定条件は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/repos/lazygit/docs/verification/readme.md#delta-の表示と性能の検証)を参照してください。Windows では git と delta の起動に時間がかかるため、小さな差分でも lazygit での表示に 0.4 秒前後かかります([Windows と Raspberry Pi の測定](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/repos/lazygit/docs/verification/readme.md#表示の速さ))。
 
 ### 見やすさを優先する設定
 
@@ -106,7 +106,7 @@ Windows 11 の実機で、scoop の delta 0.20.1 と、標準・速度優先・�
 
 ![見やすさを優先したdeltaの左右比較](docs/images/diff-renderers/delta-side-by-side-readable.png)
 
-設定形式と切替操作は [lazygit の公式資料](https://github.com/jesseduffield/lazygit/blob/v0.66.0/docs/Custom_DiffRenderers.md)、左右比較は [delta の公式資料](https://dandavison.github.io/delta/side-by-side-view.html)、各オプションは [delta の公式ヘルプ](https://dandavison.github.io/delta/full---help-output.html)を参照してください。動作確認の環境と内容は[検証記録](docs/verification/readme.md#delta-の表示と性能の検証)に記載しています。
+設定形式と切替操作は [lazygit の公式資料](https://github.com/jesseduffield/lazygit/blob/v0.66.0/docs/Custom_DiffRenderers.md)、左右比較は [delta の公式資料](https://dandavison.github.io/delta/side-by-side-view.html)、各オプションは [delta の公式ヘルプ](https://dandavison.github.io/delta/full---help-output.html)を参照してください。動作確認の環境と内容は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/repos/lazygit/docs/verification/readme.md#delta-の表示と性能の検証)に記載しています。
 
 ## Excel の差分表示
 
@@ -129,7 +129,7 @@ Excel のブックの差分をセルのテキストで出し、セルの変更�
 
 - 設定の変更は `custom` からトピックブランチを切って Pull Request で取り込みます。
 - 公式デフォルトからのカスタマイズ差分は `git diff main custom -- config.yml`(コミット単位なら `git log --oneline main..custom`)で確認できます。
-- `custom` の `config.yml` は `main` の全項目形式を保ち、変えたい値だけを書き換えます(項目の削除・並べ替え・独自ヘッダの追加はしない)。版の互換性に必要なキーの改名・移動は[検証記録](docs/verification/readme.md)に残します。変更した値の直上に日本語コメントを 1 行付けます。
+- `custom` の `config.yml` は `main` の全項目形式を保ち、変えたい値だけを書き換えます(項目の削除・並べ替え・独自ヘッダの追加はしない)。版の互換性に必要なキーの改名・移動は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/repos/lazygit/docs/verification/readme.md)に残します。変更した値の直上に日本語コメントを 1 行付けます。
 - upstream(lazygit の新バージョン)への追従は、`main` で [`scripts/fetch-upstream-config.sh`](scripts/fetch-upstream-config.sh) を実行してコミットし、
   `custom` を `git rebase main` で載せ直します(手順の詳細は `main` ブランチの README を参照)。`main` を push し、載せ直した `custom` は `git push --force-with-lease origin custom` で上げます。ほかのマシンの clone は、[導入](#導入)の表の「この設定の更新」で合わせます。
 
@@ -138,5 +138,5 @@ Excel のブックの差分をセルのテキストで出し、セルの変更�
 - [設定内容](docs/reference/readme.md)
 - [Excel の差分表示の仕様と検査](docs/excel-diff.md)・[注意点](docs/extra/excel-diff.md)
 - [Windows 11 の設定のロールバック](docs/extra/readme.md)
-- [検証記録](docs/verification/readme.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/repos/lazygit/docs/verification/readme.md)
 - テストのコマンドと、変更するときの決まりは [AGENTS.md](AGENTS.md)
