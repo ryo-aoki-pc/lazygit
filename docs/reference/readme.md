@@ -1,6 +1,6 @@
 # lazygit 設定リファレンス
 
-[README（導入の表と、このリポジトリの運用）](../../README.md) / [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/repos/lazygit/docs/verification/readme.md) / ロールバック: [Windows 11 の設定](../extra/readme.md) / [Excel の差分表示の注意点](../extra/excel-diff.md)
+[README（導入の表と、このリポジトリの運用）](../../README.md) / [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/repos/lazygit/docs/verification/readme.md) / ロールバック: [Windows 11 の設定](../extra/readme.md)
 
 `main` ブランチ(lazygit 公式のデフォルト設定)の `config.yml` を丸ごとベースにし、変更した項目にだけ日本語のコメントを付けてあります。
 
@@ -9,7 +9,7 @@
 ### 画面・操作
 
 - **[delta による左右比較の差分表示](../../README.md#delta-の設定と表示)** — 標準(構文ハイライトなし)・速度優先・見やすさ優先の3種類の左右比較と内蔵表示を `|` キーで切替可能。引用符を二重引用符に揃え、Linux と Windows で同じ設定
-- **[Excel の差分表示と部分ステージ](../excel-diff.md)** — Git の `textconv` でセルを左右比較する。ファイル一覧の `E` で既存の xlsx 系ファイルのセル値・数式を選択し、専用画面の `X` で元の Excel のままステージする。端末ごとに追加の導入が必要
+- **[Excel の差分表示と部分ステージ（excel-diff）](https://github.com/ryo-aoki-pc/excel-diff)** — ファイル一覧の `E` は、excel-diff が登録する `git excel-stage` を呼ぶ。端末ごとに excel-diff の導入が必要
 - **あいまい検索** — `/` での絞り込みが fuzzy match になり、少ないタイプ数で目的の項目に届く
 - **Nerd Fonts アイコン** — ファイル種別などをアイコンで表示
 - **情報量の多い表示** — ブランチ一覧にコミットハッシュ、ファイル一覧に変更行数(+10 −3)、ベースブランチからの遅れ(↓3)を表示

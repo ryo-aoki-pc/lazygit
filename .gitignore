@@ -8,6 +8,3 @@ development.log
 
 # Syncthing の同期マーカー
 .stfolder/
-
-# Python の実行時キャッシュ
-__pycache__/
