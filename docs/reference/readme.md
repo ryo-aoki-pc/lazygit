@@ -9,7 +9,7 @@
 ### 画面・操作
 
 - **[delta による左右比較の差分表示](../../README.md#delta-の設定と表示)** — 標準(構文ハイライトなし)・速度優先・見やすさ優先の3種類の左右比較と内蔵表示を `|` キーで切替可能。引用符を二重引用符に揃え、Linux と Windows で同じ設定
-- **[Excel の差分表示と部分ステージ（excel-diff）](https://github.com/ryo-aoki-pc/excel-diff)** — ファイル一覧の `E` は、excel-diff が登録する `git excel-stage` を呼ぶ。端末ごとに excel-diff の導入が必要
+- **[Excel・Word の差分表示と部分ステージ（excel-diff）](https://github.com/ryo-aoki-pc/excel-diff)** — ファイル一覧の `E` は、Excel と Word のどちらでも、excel-diff が登録する `git excel-stage` を呼ぶ。端末ごとに excel-diff の導入が必要
 - **あいまい検索** — `/` での絞り込みが fuzzy match になり、少ないタイプ数で目的の項目に届く
 - **Nerd Fonts アイコン** — ファイル種別などをアイコンで表示
 - **情報量の多い表示** — ブランチ一覧にコミットハッシュ、ファイル一覧に変更行数(+10 −3)、ベースブランチからの遅れ(↓3)を表示
