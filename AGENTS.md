@@ -12,7 +12,7 @@
 
 [lazygit](https://github.com/jesseduffield/lazygit) の自分用の設定（`config.yml`）。導入の表と、このリポジトリの運用は [README.md](README.md)、設定の中身は [docs/reference/readme.md](docs/reference/readme.md)、検証記録は [非公開側の readme.md](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/repos/lazygit/docs/verification/readme.md)。
 
-`E` のキーは、[excel-diff](https://github.com/ryo-aoki-pc/excel-diff) が登録する `git excel-stage` を呼ぶ。
+`E` のキーは、Excel と Word のどちらでも、[excel-diff](https://github.com/ryo-aoki-pc/excel-diff) が登録する `git excel-stage` を呼ぶ。
 
 ドキュメント・コミットメッセージ・Pull Request の説明は日本語で書く。
 
@@ -29,7 +29,7 @@
 
 ## テスト
 
-このリポジトリに自動テストは無い。Excel の道具のテストは [excel-diff](https://github.com/ryo-aoki-pc/excel-diff) にある。
+このリポジトリに自動テストは無い。Excel・Word の道具のテストは [excel-diff](https://github.com/ryo-aoki-pc/excel-diff) にある。
 
 ## 文書の置き場所
 
