@@ -1,6 +1,6 @@
 # lazygit 設定リファレンス
 
-[README（導入の表と、このリポジトリの運用）](../../README.md) / [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/repos/lazygit/docs/verification/readme.md) / ロールバック: [Windows 11 の設定](../extra/readme.md)
+[README（導入の表と、このリポジトリの運用）](../../README.md) / [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/repos/lazygit/docs/verification/readme.md)
 
 `main` ブランチ(lazygit 公式のデフォルト設定)の `config.yml` を丸ごとベースにし、変更した項目にだけ日本語のコメントを付けてあります。
 
