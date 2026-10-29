@@ -16,7 +16,6 @@
 | Excel・Word の差分表示と部分ステージ（任意。excel-diff） | [excel-diff を導入・更新する](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/almalinux-setup.md#excel-diff-を導入更新する) | [excel-diff を導入・更新する](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md#excel-diff-を導入更新する) |
 | この設定の更新 | [lazygit の設定を更新する](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/almalinux-setup.md#lazygit-の設定を更新する) | [lazygit の設定を更新する](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md#lazygit-の設定を更新する) |
 | 本体の更新 | [共通の bash 設定・Homebrew・Flatpak を上げる](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/almalinux-setup.md#共通の-bash-設定homebrewflatpak-を上げる)の手順 2・3 | [scoop・winget・WSL を上げる](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md#scoopwingetwsl-を上げる)の手順 2・3 |
-| 戻す | [Git の道具を消す](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/extra/almalinux-setup.md#git-の道具を消す)の手順 1 (この設定の clone とリンクの消し方は、その箇条書き) | [Git の道具を消す](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/extra/windows-setup.md#git-の道具を消す)の手順 1・2 (この設定だけ戻すなら [Windows 11 のロールバック](docs/extra/readme.md#windows-11-のロールバック)) |
 
 - この設定は、Nerd Fonts（v3 系）と git-delta を前提にしている。入れないときは、次の設定を外す
 
@@ -60,7 +59,7 @@ Windows の lazygit は、描画のコマンドを `cmd /s /c "<コマンド>"`(
 
 delta 本体と VC++ ランタイムの導入・確認は [Windows 11 の git-delta](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md#git-delta)で行う。
 
-Windows 11 の実機で、scoop の delta 0.20.1 と、標準・速度優先・見やすさ優先の各コマンド(速度優先と見やすさ優先は二重引用符の形)の表示を確認しました。単一引用符の形は表示が崩れます。結果は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/repos/lazygit/docs/verification/readme.md#windows-と-raspberry-pi-の実機での検証2026-10-08)に記載しています。4項目を切り替える今の `config.yml` は、Linux の lazygit で確認しました([検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/repos/lazygit/docs/verification/readme.md#delta-の表示の切り替えを既定にする2026-10-09))。
+Windows 11 の実機で、scoop の delta 0.20.1 と、標準・速度優先・見やすさ優先の各コマンド(速度優先と見やすさ優先は二重引用符の形)の表示を確認しました。単一引用符の形は表示が崩れます。結果は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/repos/lazygit/docs/verification/readme.md)に記載しています。4項目を切り替える今の `config.yml` は、Linux の lazygit で確認しました([検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/repos/lazygit/docs/verification/readme.md#delta-の表示の切り替えを既定にする2026-10-09))。
 
 ### 標準の設定
 
@@ -136,6 +135,5 @@ Excel のブックと Word の文書の差分表示と部分ステージには�
 ## 文書
 
 - [設定内容](docs/reference/readme.md)
-- [Windows 11 の設定のロールバック](docs/extra/readme.md)
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/repos/lazygit/docs/verification/readme.md)
 - 変更するときの決まりは [AGENTS.md](AGENTS.md)

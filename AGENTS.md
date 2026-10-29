@@ -6,7 +6,7 @@
 
 ## 導入手順の正本
 
-導入・更新・使い方の手順は、setup-notes の [almalinux-setup.md](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/almalinux-setup.md#lazygit) と [windows-setup.md](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md#lazygit) の「lazygit」とその子の項（設定の導入）にある。このリポジトリには置かない。Windows 11 の設定のロールバックは、このリポジトリに置く。
+導入・更新・使い方の手順は、setup-notes の [almalinux-setup.md](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/almalinux-setup.md#lazygit) と [windows-setup.md](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md#lazygit) の「lazygit」とその子の項（設定の導入）にある。このリポジトリには置かない。
 
 ## このリポジトリは何か
 
@@ -25,7 +25,7 @@
 - `config.yml` — lazygit の設定。lazygit の設定ディレクトリに置くかリンクを張って使う（Windows は `%LOCALAPPDATA%\lazygit` に直接 clone する）
 - `scripts/fetch-upstream-config.sh` — 上流の既定の設定を取り出す（`main` の更新用）
 - `.gitignore` — Windows の lazygit が同じフォルダーに作る状態ファイル（`state.yml` など）を除く
-- `docs/extra/readme.md` — Windows 11 の設定のロールバック。`docs/reference/readme.md` — 設定の中身と理由。非公開側の検証記録は `readme.md`。`docs/images/` — README の画像
+- `docs/reference/readme.md` — 設定の中身と理由。非公開側の検証記録は `readme.md`。`docs/images/` — README の画像
 
 ## テスト
 
@@ -34,7 +34,7 @@
 ## 文書の置き場所
 
 - 導入・利用・更新の手順は正本に置き、README の「導入」の表から正本の項へ直接リンクする（手順書の先頭やカテゴリの見出しへはリンクしない）。執筆規則は setup-notes の `docs/dev/writing-rules.md`
-- `docs/extra/` はロールバックと注意点、`docs/reference/` は設定の中身と理由。検証記録（実施日・環境・結果・未確認事項）は非公開の `ryo-aoki-pc/setup-notes-verification` の `repos/lazygit/docs/verification/` に置く
+- `docs/extra/` は注意点。ロールバック（取り消し）の手順は書かない。`docs/reference/` は設定の中身と理由。検証記録（実施日・環境・結果・未確認事項）は非公開の `ryo-aoki-pc/setup-notes-verification` の `repos/lazygit/docs/verification/` に置く
 - 文書を移す・分ける・まとめるときは、移した経緯と、旧ファイル名・旧見出しとの対応を文書に書かない（経緯は git の履歴と Pull Request の本文に残す）。リンクを今の場所へ直す。中身が新しい場所への案内だけになったファイルは消す
 - 検証記録を書く・直すときは、`setup-notes-verification` を clone し、そちらへ Pull Request を作る
 - 検証していないことを「動く」と書かない
@@ -70,4 +70,4 @@
 - Claude Code から頼まれたエージェントは、上の自分の役割の範囲で作業する
 - レビューの指摘は、実物で確かめてから採る。採らなかった指摘は、理由を付けて報告する
 - 使えないエージェント（入っていない・ログインが切れた）は飛ばし、そのことを報告する
-- 頼み方は、[setup-notes](https://github.com/ryo-aoki-pc/setup-notes) の `docs/ai-agents.md` の「コーディングエージェントの共同作業: Windows 11 で既定で分担する」と、`docs/reference/coding-agents.md` の「既定の分担」
+- 頼み方は、Forgejo の非公開リポジトリ `setup-notes-private` の `docs/ai-agents.md` の「コーディングエージェントの共同作業: Windows 11 で既定で分担する」と、`docs/reference/coding-agents.md` の「既定の分担」
