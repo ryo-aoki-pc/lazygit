@@ -9,7 +9,7 @@
 
 | | AlmaLinux 10 | Windows 11 |
 | --- | --- | --- |
-| フォント（Nerd Fonts） | [HackGen Console NF](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/shell-terminal.md#hackgen-console-nf) | [Windows 11 で HackGen Console NF を入れる](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/shell-terminal.md#windows-11-で-hackgen-console-nf-を入れる) |
+| フォント（Nerd Fonts） | [HackGen Console NF](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/shell-terminal.md#hackgen-console-nf) | [HackGen の公式の案内](https://github.com/yuru7/HackGen) |
 | 差分の表示に使う git-delta | [git-delta](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/almalinux-setup.md#git-delta) | [git-delta](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md#git-delta) |
 | 本体とこの設定 | [lazygit](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/almalinux-setup.md#lazygit) (手順 2 で「lazygit の設定を導入する」も通す) | [lazygit](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md#lazygit) (手順 5 で「lazygit の設定を導入する」も通す) |
 | この設定だけ (本体が入っているとき) | [lazygit の設定を導入する](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/almalinux-setup.md#lazygit-の設定を導入する) | [lazygit の設定を導入する](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md#lazygit-の設定を導入する) |
