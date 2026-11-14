@@ -4,15 +4,15 @@
 
 ## 導入
 
-- 対象: AlmaLinux 10 と Windows 11 の自分のユーザー。手順は setup-notes にあり、フォントと git-delta、本体を入れてから、この設定を入れる
+- 対象: AlmaLinux 10 と Windows 11 の自分のユーザー。AlmaLinux 10 の手順は setup-notes にある。Windows 11 は、フォント・git-delta・lazygit と自分用の設定が入っていることを前提にする
 - macOS の設定の置き場所は `~/Library/Application Support/lazygit/config.yml`（手順と検証は無い）
 
 | | AlmaLinux 10 | Windows 11 |
 | --- | --- | --- |
 | フォント（Nerd Fonts） | [HackGen Console NF](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/shell-terminal.md#hackgen-console-nf) | [HackGen の公式の案内](https://github.com/yuru7/HackGen) |
-| 差分の表示に使う git-delta | [git-delta](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/almalinux-setup.md#git-delta) | [git-delta](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md#git-delta) |
-| 本体とこの設定 | [lazygit](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/almalinux-setup.md#lazygit) (手順 2 で「lazygit の設定を導入する」も通す) | [lazygit](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md#lazygit) (手順 5 で「lazygit の設定を導入する」も通す) |
-| この設定だけ (本体が入っているとき) | [lazygit の設定を導入する](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/almalinux-setup.md#lazygit-の設定を導入する) | [lazygit の設定を導入する](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md#lazygit-の設定を導入する) |
+| 差分の表示に使う git-delta | [git-delta](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/almalinux-setup.md#git-delta) | [delta の公式の導入案内](https://dandavison.github.io/delta/installation.html) |
+| 本体とこの設定 | [lazygit](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/almalinux-setup.md#lazygit) (手順 2 で「lazygit の設定を導入する」も通す) | [lazygit の公式の導入案内](https://github.com/jesseduffield/lazygit#installation)。自分用の設定が入っていること |
+| この設定だけ (本体が入っているとき) | [lazygit の設定を導入する](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/almalinux-setup.md#lazygit-の設定を導入する) | `%LOCALAPPDATA%\lazygit` にこの設定の `custom` ブランチの clone があること |
 | Excel・Word の差分表示と部分ステージ（任意。excel-diff） | [excel-diff を導入・更新する](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/install.md#excel-diff-を導入更新する) | [Windows 11 で excel-diff を導入・更新する](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/install.md#windows-11-で-excel-diff-を導入更新する) |
 | この設定の更新 | [lazygit の設定を更新する](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/almalinux-setup.md#lazygit-の設定を更新する) | [lazygit の設定を更新する](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md#lazygit-の設定を更新する) |
 | 本体の更新 | [共通の bash 設定・Homebrew・Flatpak を上げる](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/almalinux-setup.md#共通の-bash-設定homebrewflatpak-を上げる)の手順 2・3 | [scoop・winget・WSL を上げる](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md#scoopwingetwsl-を上げる)の手順 2・3 |
@@ -57,7 +57,7 @@ git:
 
 Windows の lazygit は、描画のコマンドを `cmd /s /c "<コマンド>"`(cmd.exe)で実行します。cmd.exe も delta.exe の引数の解釈も単一引用符 `'…'` を引用符として扱わないため、`'` が値に残ったり、空白で引数が分かれたりします。このため、上の設定は値を二重引用符 `"…"` で囲んでいます。二重引用符の形は Linux でも単一引用符の形と同じ表示になるため、OS ごとに書き換える必要はありません。オプションを書き足す場合も、値は二重引用符で囲んでください。
 
-delta 本体と VC++ ランタイムの導入・確認は [Windows 11 の git-delta](https://github.com/ryo-aoki-pc/setup-notes/blob/main/docs/windows-setup.md#git-delta)で行う。
+delta 本体は [delta の公式の導入案内](https://dandavison.github.io/delta/installation.html)、VC++ ランタイムは [Microsoft の公式の案内](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist)に従う。
 
 Windows 11 の実機で、scoop の delta 0.20.1 と、標準・速度優先・見やすさ優先の各コマンド(速度優先と見やすさ優先は二重引用符の形)の表示を確認しました。単一引用符の形は表示が崩れます。結果は検証記録（`repos/lazygit/docs/verification/readme.md`）に記載しています。4項目を切り替える今の `config.yml` は、Linux の lazygit で確認しました(検証記録: `repos/lazygit/docs/verification/readme.md` の「delta の表示の切り替えを既定にする（2026-10-09）」)。
 
