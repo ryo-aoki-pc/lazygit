@@ -661,6 +661,35 @@ customCommands:
     description: Excel・Word のハンクを選択してステージ
     command: 'git excel-stage -- {{.SelectedFile.Name | quote}}'
     output: terminal
+  # コミットの欄の U で、選んだコミットまでを上流へプッシュ（強制はしない。上流が無ければリモートを選んで上流に設定）
+  - key: U
+    context: commits
+    description: 選択したコミットまでをプッシュ
+    loadingText: プッシュ中
+    output: log
+    prompts:
+      - type: menuFromCommand
+        title: プッシュ先のリモート（上流に設定する）
+        key: Remote
+        command: git remote
+        condition: '{{and (not .CheckedOutBranch.UpstreamRemote) (not .CheckedOutBranch.DetachedHead)}}'
+      - type: confirm
+        title: 選択したコミットまでをプッシュ
+        body: |-
+          {{if .CheckedOutBranch.DetachedHead -}}
+          ブランチに切り替えていない（detached HEAD）ので、プッシュできない。Esc で閉じる。
+          {{- else if ne (runCommand (printf "git rev-list --count HEAD..%s" .SelectedCommit.Hash)) "0" -}}
+          このコミットは今のブランチに無いので、プッシュできない。Esc で閉じる。
+          {{- else -}}
+          {{- $remote := or .CheckedOutBranch.UpstreamRemote .Form.Remote -}}
+          {{slice .SelectedCommit.Hash 0 8}} {{.SelectedCommit.Name}} までを {{if .CheckedOutBranch.UpstreamRemote}}{{.CheckedOutBranch.UpstreamRemote}}/{{.CheckedOutBranch.UpstreamBranch}} へプッシュする{{else}}{{.Form.Remote}}/{{.CheckedOutBranch.Name}} へプッシュし、上流に設定する{{end}}。
+          強制プッシュはしない。
+          {{$remote}} に無いコミット: {{runCommand (printf "git rev-list --count %s --not %s" .SelectedCommit.Hash (printf "--remotes=%s" $remote | quote))}} 個
+          {{- end}}
+    command: >-
+      {{if .CheckedOutBranch.DetachedHead}}git symbolic-ref HEAD{{else}}git merge-base --is-ancestor {{.SelectedCommit.Hash}} HEAD &&
+      {{if .CheckedOutBranch.UpstreamRemote}}git push {{.CheckedOutBranch.UpstreamRemote | quote}} {{printf "%s:refs/heads/%s" .SelectedCommit.Hash .CheckedOutBranch.UpstreamBranch | quote}}{{else}}git push {{.Form.Remote | quote}} {{printf "%s:refs/heads/%s" .SelectedCommit.Hash .CheckedOutBranch.Name | quote}} &&
+      git branch {{printf "--set-upstream-to=%s/%s" .Form.Remote .CheckedOutBranch.Name | quote}}{{end}}{{end}}
 
 # See https://github.com/jesseduffield/lazygit/blob/master/docs/Config.md#custom-pull-request-urls
 services: {}
